@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="jumbotron" xmlns="http://www.w3.org/1999/html">
+  <div class="row">
+          <div class="col-left">
+	</div>
+    <div class="col-middle">
+    </div>
+    <div class="col-right">
+    </div>
+	</div>
+{% if session['username'] %}
+    <a href="/home" style = "text-decoration: none;"><h1 class="page-title"><img src="{{url_for('static', filename='rototargets.png')}}" /></h1></a>
+{% else %}
+    <a href="/" style = "text-decoration: none;"><h1 class="page-title"><img src="{{url_for('static', filename='rototargets.png')}}" /></h1></a>
+{% endif %}
+    <br>
+
+</div>
+<br>
+<br>
+<div class="card mx-auto">
+    <p class="card-title">{{adjust_name}}</p>
+    <table class="contest_table">
+            <tr>
+                <th class="contest_tableheader">Name</th>
+                <th class="contest_tableheader">Adjustment</th>
+            </tr>
+                {% for adjustment in adjustments %}
+            <tr>
+                <td class="contest_tablerow">{{adjustment.mlbamid}} </td>
+                <td class="contest_tablerow">{{adjustment.adjustment}} </td>
+            </tr>
+        {% endfor %}
+                </table>
+
+            <a class="btn btn-orange thin" href="/projection_adjust/{{adjust_id}}">View Rankings/Edit Adjustments</a>
+<br>
+</div>
+{% endblock %}

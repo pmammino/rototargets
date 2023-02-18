@@ -1,0 +1,121 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="jumbotron" xmlns="http://www.w3.org/1999/html">
+  <div class="row">
+          <div class="col-left">
+	</div>
+    <div class="col-middle">
+    </div>
+    <div class="col-right">
+    </div>
+	</div>
+{% if session['username'] %}
+    <a href="/home" style = "text-decoration: none;"><h1 class="page-title"><img src="{{url_for('static', filename='rototargets.png')}}" /></h1></a>
+{% else %}
+    <a href="/" style = "text-decoration: none;"><h1 class="page-title"><img src="{{url_for('static', filename='rototargets.png')}}" /></h1></a>
+{% endif %}    <br>
+
+</div>
+<br>
+       		<div class="panel-group">
+  <div class="panel panel-default">
+    <div class="panel-heading">
+      <h2 class="panel-title">
+        <a data-toggle="collapse" href="#Adjustments">My Adjustments</a>
+      </h2>
+    </div>
+    <div id="Adjustments" class="panel-collapse collapse">
+
+                {% for adjustment in adjustments %}
+        <div class="row">
+
+            <button type="button" class="btn btn-orange" data-toggle="modal" data-target="#{{adjustment._id}}">{{adjustment.adjustment_name}}
+  </button>
+</div>
+                <br>
+            <div class="modal" id={{adjustment._id}}>
+    <div class="modal-dialog">
+      <div class="modal-content">
+
+        <!-- Modal Header -->
+        <div class="modal-header">
+          <h4 class="modal-title">{{adjustment.adjustment_name}}</h4>
+          <button type="button" class="close" data-dismiss="modal">&times;</button>
+        </div>
+
+        <!-- Modal body -->
+        <div class="modal-body">
+          Choose Action Below
+        </div>
+
+        <!-- Modal footer -->
+        <div class="modal-footer">
+            <a class="btn btn-orange update" href="/adjustment_view/{{adjustment._id}}">View Adjustments</a>
+            <a class="btn btn-orange update" href="/projection_adjust/{{adjustment._id}}">View Rankings</a>
+            <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+        {% endfor %}
+                <div class="row">
+          <a href="/projections" class=" btn btn-orange">Create New</a>
+</div>
+</div>
+  </div>
+</div>
+</div>
+<br>
+       		<div class="panel-group">
+  <div class="panel panel-default">
+    <div class="panel-heading">
+      <h2 class="panel-title">
+        <a data-toggle="collapse" href="#Targets">My Targets</a>
+      </h2>
+    </div>
+    <div id="Targets" class="panel-collapse collapse">
+
+                {% for target in targets %}
+        <div class="row">
+
+            <button type="button" class="btn btn-orange" data-toggle="modal" data-target="#{{target._id}}">{{target.target_name}}
+  </button>
+</div>
+                <br>
+            <div class="modal" id={{target._id}}>
+    <div class="modal-dialog">
+      <div class="modal-content">
+
+        <!-- Modal Header -->
+        <div class="modal-header">
+          <h4 class="modal-title">{{target.target_name}}</h4>
+          <button type="button" class="close" data-dismiss="modal">&times;</button>
+        </div>
+
+        <!-- Modal body -->
+        <div class="modal-body">
+          Choose Action Below
+        </div>
+
+        <!-- Modal footer -->
+        <div class="modal-footer">
+            <a class="btn btn-orange update" href="/target_view/{{target._id}}">View Targets</a>
+            <a class="btn btn-orange update" href="/projection_adjust/{{target._id}}">View Rankings</a>
+            <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+        {% endfor %}
+</div>
+  </div>
+</div>
+</div>
+<br>
+{% endblock %}

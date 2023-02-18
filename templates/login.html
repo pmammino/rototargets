@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="jumbotron" xmlns="http://www.w3.org/1999/html">
+  <div class="row">
+    <div class="col-left">
+	</div>
+    <div class="col-middle">
+    </div>
+    <div class="col-right">
+<a class="clickme-header" href="/register">Register</a>
+    </div>
+	</div>
+{% if session['username'] %}
+    <a href="/home" style = "text-decoration: none;"><h1 class="page-title"><img src="{{url_for('static', filename='rototargets.png')}}" /></h1></a>
+{% else %}
+    <a href="/" style = "text-decoration: none;"><h1 class="page-title"><img src="{{url_for('static', filename='rototargets.png')}}" /></h1></a>
+{% endif %}    <br>    <br>
+
+</div>
+<br>
+<br>
+<br>
+<p class="error" align="center">{{text}}</p>
+<div class="container page-form">
+    <form id="login-form" xmlns="http://www.w3.org/1999/html" action = "/loginvalid" method = "post">
+    <div class="form-group">
+        <label for ="email">Email</label>
+        <input type="text" class = "form-control form-control-lg" id="email" name="email">
+    </div>
+    <div class="form-group">
+        <label for = "password">Password</label>
+        <input type="password" class = "form-control form-control-lg" id="password" name="password">
+    </div>
+        <button type="submit" class="btn btn-orange">Sign In</button>
+    </form>
+</div>
+    <br><p>Don't Have An Account <a class="register-link" href="/register">Click Here</a> To Create One</p>
+{% endblock %}

@@ -1,0 +1,123 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="jumbotron" xmlns="http://www.w3.org/1999/html">
+  <div class="row">
+          <div class="col-left">
+	</div>
+    <div class="col-middle">
+    </div>
+    <div class="col-right">
+    </div>
+	</div>
+{% if session['username'] %}
+    <a href="/home" style = "text-decoration: none;"><h1 class="page-title"><img src="{{url_for('static', filename='rototargets.png')}}" /></h1></a>
+{% else %}
+    <a href="/" style = "text-decoration: none;"><h1 class="page-title"><img src="{{url_for('static', filename='rototargets.png')}}" /></h1></a>
+{% endif %}
+    <br>
+
+</div>
+<form class="adjust" action = "/adjust" method = "post">
+    <div class="input-group mb-3">
+  <input type="text" class="form-control" name='adjust_name' value={{default}} aria-label="Adjustment Name" aria-describedby="basic-addon2">
+  <div class="input-group-append">
+<button type="submit" class="btn btn-orange update">Save Updates</button>
+  </div>
+        <br>
+                      <select class = "form-control form-control-lg" name="target" id="target">
+    {% for target in targets %}
+
+  <option value="{{target._id}}">{{target.target_name}}</option>
+    {%endfor%}
+</select>
+  <div class="input-group-append">
+<button type="button" class="btn btn-orange update" disabled>Target</button>
+  </div>
+</div>
+{% for _, row in stats.iterrows() %}
+{% if row["POSITION"] == "P" %}
+<div class="card mx-auto">
+    <p class="card-title  {{row['up']}} {{row['down']}}">{{ row["firstname"] }} {{ row["lastname"]}} - {{row["POSITION"]}}</p>
+    <table class="contest_table">
+            <tr>
+                <th class="contest_tableheader">IP</th>
+                <th class="contest_tableheader">W</th>
+                <th class="contest_tableheader">SV</th>
+                <th class="contest_tableheader">K</th>
+                <th class="contest_tableheader">ERA</th>
+                <th class="contest_tableheader">WHIP</th>
+                <th class="contest_tableheader">Value</th>
+
+            </tr>
+            <tr>
+                <td class="contest_tablerow">{{row["IP"]}} </td>
+                <td class="contest_tablerow">{{row["W"]}} </td>
+                <td class="contest_tablerow">{{row["SV"]}} </td>
+                <td class="contest_tablerow">{{row["K"]}} </td>
+                <td class="contest_tablerow">{{row["ERA"]}} </td>
+                <td class="contest_tablerow">{{row["WHIP"]}} </td>
+                <td class="contest_tablerow">{{row["Val"]}} </td>
+
+            </tr>
+        </table>
+    <div class="form-check form-check-inline">
+<input type="radio" class="btn-check" name='{{row["mlbamid"]}}' id='{{row["mlbamid"]}}1p' autocomplete="off" value="-1.0" {{row["Down2"]}} >
+<label class="btn btn-outline-danger" for='{{row["mlbamid"]}}1p'>-10%</label>
+
+<input type="radio" class="btn-check" name='{{row["mlbamid"]}}' id='{{row["mlbamid"]}}2p' autocomplete="off" {{row["Down1"]}} value="-0.5" >
+<label class="btn btn-outline-danger" for='{{row["mlbamid"]}}2p'>-5%</label>
+
+<input type="radio" class="btn-check" name='{{row["mlbamid"]}}' id='{{row["mlbamid"]}}3p' autocomplete="off" {{row["Even"]}} value="0.0">
+<label class="btn btn-outline-secondary" for='{{row["mlbamid"]}}3p'>No Change</label>
+
+<input type="radio" class="btn-check" name='{{row["mlbamid"]}}' id='{{row["mlbamid"]}}4p' autocomplete="off" {{row["Up1"]}} value="0.5">
+<label class="btn btn-outline-success" for='{{row["mlbamid"]}}4p'>+5%</label>
+        <input type="radio" class="btn-check" name='{{row["mlbamid"]}}' id='{{row["mlbamid"]}}5p' autocomplete="off" {{row["Up2"]}} value="1.0">
+<label class="btn btn-outline-success" for='{{row["mlbamid"]}}5p'>+10%</label>
+    </div></div>
+{% else %}
+<div class="card mx-auto">
+    <p class="card-title  {{row['up']}} {{row['down']}}">{{ row["firstname"] }} {{ row["lastname"]}} - {{row["POSITION"]}}</p>
+    <table class="contest_table">
+            <tr>
+                <th class="contest_tableheader">AB</th>
+                <th class="contest_tableheader">HR</th>
+                <th class="contest_tableheader">R</th>
+                <th class="contest_tableheader">RBI</th>
+                <th class="contest_tableheader">SB</th>
+                <th class="contest_tableheader">AVG</th>
+                <th class="contest_tableheader">Value</th>
+
+            </tr>
+            <tr>
+                <td class="contest_tablerow">{{row["AB"]}} </td>
+                <td class="contest_tablerow">{{row["HR"]}} </td>
+                <td class="contest_tablerow">{{row["R"]}} </td>
+                <td class="contest_tablerow">{{row["RBI"]}} </td>
+                <td class="contest_tablerow">{{row["SB"]}} </td>
+                <td class="contest_tablerow">{{row["AVG"]}} </td>
+                <td class="contest_tablerow">{{row["Val"]}} </td>
+
+            </tr>
+        </table>
+    <div class="form-check form-check-inline">
+<input type="radio" class="btn-check" name='{{row["mlbamid"]}}' id='{{row["mlbamid"]}}1' autocomplete="off" {{row["Down2"]}} value = "-1.0" >
+<label class="btn btn-outline-danger" for='{{row["mlbamid"]}}1'>-10%</label>
+
+<input type="radio" class="btn-check" name='{{row["mlbamid"]}}' id='{{row["mlbamid"]}}2' autocomplete="off" {{ row["Down1"] }} value ="-0.5">
+<label class="btn btn-outline-danger" for='{{row["mlbamid"]}}2'>-5%</label>
+
+<input type="radio" class="btn-check" name='{{row["mlbamid"]}}' id='{{row["mlbamid"]}}3' autocomplete="off" {{row["Even"]}} value = "0.0">
+<label class="btn btn-outline-secondary" for='{{row["mlbamid"]}}3'>No Change</label>
+
+<input type="radio" class="btn-check" name='{{row["mlbamid"]}}' id='{{row["mlbamid"]}}4' autocomplete="off" {{row["Up1"]}} value="0.5">
+<label class="btn btn-outline-success" for='{{row["mlbamid"]}}4'>+5%</label>
+        <input type="radio" class="btn-check" name='{{row["mlbamid"]}}' id='{{row["mlbamid"]}}5' autocomplete="off" {{row["Up2"]}} value = "1.0">
+<label class="btn btn-outline-success" for='{{row["mlbamid"]}}5'>+10%</label>
+    </div></div>
+{% endif %}
+
+{% endfor %}
+
+</form>
+{% endblock %}

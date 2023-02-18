@@ -1,0 +1,245 @@
+a, a:hover, a:focus, a:active {
+    text-decoration: none!important;
+    color: inherit;
+}
+
+.page-header {
+  background-color: black;
+}
+
+body {
+background-color: #A9A9A9!important;
+}
+
+.error{
+color: red!important;}
+
+.clickme {
+    background-color: #353839;
+    padding: 1vw 2vw;
+    color: white;
+    text-decoration: none!important;
+    font-weight:bold;
+    border-radius:1vw;
+}
+
+.clickme-header {
+    background-color: #353839;
+    color: white;
+    text-decoration: none!important;
+    font-weight: bold;
+    padding: 0.75vw 0.5vw;
+    border-radius: 0.75vw;
+}
+.card {
+    width: 85vw;!important;
+    background-color: #353839;
+    color: white;
+    text-align:center;
+    align: center;
+    font-size: 1.5vw;
+    border-color: white;
+    border-radius: 2em;
+}
+
+a.nav-link {
+  color: white;
+  background-color: gray;
+  font-size: 2vw;
+}
+
+a.nav-link.active {
+  background-color: black;
+  font-size: 2vw;
+}
+
+.jumbotron {
+    background-color: #0bb971!important;
+    padding-top: 0px!important;
+    padding-bottom: 0px!important;
+    padding-top: 0px!important;
+    padding-bottom: 0px!important;;
+    margin-bottom: 0px!important;
+}
+
+.page-title {
+  text-align: center;
+  color: white;
+  font-size:7vw;
+  font-weight: bold;
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+.header {
+  color: black;
+  font-weight: bold;
+  text-align: center;
+  font-size: 6vw!important;
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+.sub_header {
+  color: black;
+  text-align: center;
+  font-size: 3vw!important;
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+.nav-pills .nav-link.active {
+    background-color: black!important;
+}
+
+
+select{
+  text-align: center;
+  color: #F9812A;
+}
+
+
+p {
+  text-align: center;
+  color: black;
+}
+
+.btn-orange {
+  background-color: #353839;
+  color: white;
+}
+
+li {
+  color: white!important;
+    background-color: #353839!important;
+
+}
+
+table {
+  margin-left: auto;
+  margin-right: auto;
+    text-align: center;
+      width: 84vw;!important;
+      font-size: 1vw!important;
+      background-color:#0bb971!important;
+    border-collapse:separate;
+    border-radius:2em;
+}
+
+th {
+text-align: center!important;
+width: 12vw!important;
+
+}
+
+.center {
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+  width: 50vm;
+}
+
+img {
+  max-width: 100%;
+  height: auto;
+}
+
+.panel-group{
+text-align: center;
+}
+
+tr{
+width: 12vw!important;
+}
+
+label{
+font-size: 1vw!important;
+}
+
+.col-left{
+    align-items: center;
+    display: flex;
+    flex: 1;
+    justify-content: flex-start;
+}
+
+.col-middle{
+    align-items: center;
+    display: flex;
+    flex: 1;
+    justify-content: center;
+}
+
+.col-right{
+    align-items: center;
+    display: flex;
+    flex: 1;
+    justify-content: flex-end;
+}
+
+.row{
+    margin-right: 0px!important;
+    margin-left: 0!important;
+}
+
+.panels{
+width: 48vw!important;
+    background-color: #353839!important;
+
+}
+
+.list-group {
+    margin-bottom: 0px!important;
+}
+
+.list-group-item {
+    padding: 0px 0px!important;
+}
+
+h2{
+    margin-top: 0px!important;
+    color: #0bb971!important;
+    font-size: 3vw!important;
+}
+
+.card-text{
+color: white!important;
+}
+
+.card-title{
+color: white!important;
+}
+
+.update{
+width: 13vw;
+}
+
+.update{
+width: 13vw;
+}
+
+.form-control
+{
+width: 83vw!important;
+margin-left: 1vw!important;
+
+}
+
+.modal-header {
+padding: 8px!important;
+display: block!important;
+}
+
+.modal-header .close {
+    margin-top: -32px!important;
+}
+
+.modal-footer
+{
+justify-content: center!important;
+}
+
+.down{
+color: red!important;
+}
+
+.up{
+color: #0bb971!important;
+}

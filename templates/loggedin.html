@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="jumbotron" xmlns="http://www.w3.org/1999/html">
+  <div class="row">
+          <div class="col-left">
+	</div>
+    <div class="col-middle">
+    </div>
+    <div class="col-right">
+    </div>
+	</div>
+{% if session['username'] %}
+    <a href="/home" style = "text-decoration: none;"><h1 class="page-title"><img src="{{url_for('static', filename='rototargets.png')}}" /></h1></a>
+{% else %}
+    <a href="/" style = "text-decoration: none;"><h1 class="page-title"><img src="{{url_for('static', filename='rototargets.png')}}" /></h1></a>
+{% endif %}    <br>
+
+</div>
+<br>
+<div class="row">
+  <div class="col-sm-6">
+    <div class="card panels">
+      <div class="card-body">
+ <h2 class="card-title">PROJECTIONS</h2>
+          <p class="card-text">View Default Projections</p>
+    <p class="card-text">Upload Your Own Projections</p>
+    <p class="card-text">Set Adjustments To Projections</p>
+          <a href="/projections_home" class="btn btn-primary">Go To Projections</a>
+      </div>
+    </div>
+  </div>
+  <div class="col-sm-6">
+    <div class="card panels">
+      <div class="card-body">
+        <h2 class="card-title">TARGETS</h2>
+    <p class="card-text">View Default Stat Target</p>
+    <p class="card-text">Add Your Own Target Values</p>
+    <p class="card-text">Generate Target Values For Any Custom League</p>
+          <a href="#" class="btn btn-primary">Go To Targets</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock %}

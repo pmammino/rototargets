@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="jumbotron" xmlns="http://www.w3.org/1999/html">
+  <div class="row">
+          <div class="col-left">
+	</div>
+    <div class="col-middle">
+    </div>
+    <div class="col-right">
+    </div>
+	</div>
+{% if session['username'] %}
+    <a href="/home" style = "text-decoration: none;"><h1 class="page-title"><img src="{{url_for('static', filename='rototargets.png')}}" /></h1></a>
+{% else %}
+    <a href="/" style = "text-decoration: none;"><h1 class="page-title"><img src="{{url_for('static', filename='rototargets.png')}}" /></h1></a>
+{% endif %}
+    <br>
+
+</div>
+<br>
+<br>
+<div class="card mx-auto">
+    <p class="card-title">{{target.target_name}}</p>
+    <table class="contest_table">
+            <tr>
+                <th class="contest_tableheader">HR</th>
+                <th class="contest_tableheader">AVG</th>
+                <th class="contest_tableheader">R</th>
+                <th class="contest_tableheader">RBI</th>
+                <th class="contest_tableheader">SB</th>
+                <th class="contest_tableheader">Hitters</th>
+            </tr>
+                    <tr>
+                <td class="contest_tableheader">{{target.HR[0]}}</td>
+                <td class="contest_tableheader">{{target.AVG[0]}}</td>
+                <td class="contest_tableheader">{{target.R[0]}}</td>
+                <td class="contest_tableheader">{{target.RBI[0]}}</td>
+                <td class="contest_tableheader">{{target.SB[0]}}</td>
+                <td class="contest_tableheader">{{target.hitters[0]}}</td>
+            </tr>
+            <tr>
+                <th class="contest_tableheader">W</th>
+                <th class="contest_tableheader">ERA</th>
+                <th class="contest_tableheader">SO</th>
+                <th class="contest_tableheader">WHIP</th>
+                <th class="contest_tableheader">SV</th>
+                <th class="contest_tableheader">Pitchers</th>
+            </tr>
+                            <tr>
+                <td class="contest_tableheader">{{target.W[0]}}</td>
+                <td class="contest_tableheader">{{target.ERA[0]}}</td>
+                <td class="contest_tableheader">{{target.SO[0]}}</td>
+                <td class="contest_tableheader">{{target.WHIP[0]}}</td>
+                <td class="contest_tableheader">{{target.SV[0]}}</td>
+                <td class="contest_tableheader">{{target.pitchers[0]}}</td>
+            </tr>
+                </table>
+    <br>
+</div>
+{% endblock %}
