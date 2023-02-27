@@ -1,0 +1,118 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="jumbotron" xmlns="http://www.w3.org/1999/html">
+  <div class="row">
+          <div class="col-left">
+	</div>
+    <div class="col-middle">
+    </div>
+    <div class="col-right">
+    </div>
+	</div>
+{% if session['username'] %}
+    <a href="/home" style = "text-decoration: none;"><h1 class="page-title"><img src="{{url_for('static', filename='rototargets.png')}}" /></h1></a>
+{% else %}
+    <a href="/" style = "text-decoration: none;"><h1 class="page-title"><img src="{{url_for('static', filename='rototargets.png')}}" /></h1></a>
+{% endif %}
+    <br>
+
+</div>
+<br>
+<form class="targets" action = "/target_save" method = "post">
+    <div class="input-group mb-3">
+  <input type="text" required class="form-control" name='target_name' aria-label="Target Name" aria-describedby="basic-addon2">
+  <div class="input-group-append">
+<button type="submit" class="btn btn-orange update">Save Targets</button>
+  </div>
+    </div>
+    <br>
+    <div class="input-group mb-3">
+  <div class="input-group-append">
+    <input type="number" required  class="form-control" id="hitters" name="hitters" aria-label="Number Starting Hitters" aria-describedby="basic-addon2">
+        </div>
+      <div class="input-group-append">
+<button type="button" class="btn btn-orange update" disabled>Number Starting Hitters</button>
+  </div>
+        </div>
+        <div class="input-group mb-3">
+  <div class="input-group-append">
+    <input type="number" required class="form-control" id="avg" step="0.001" name="avg" aria-label="Target AVG" aria-describedby="basic-addon2">
+        </div>
+      <div class="input-group-append">
+<button type="button" class="btn btn-orange update" disabled>Target AVG</button>
+  </div>
+        </div>
+        <div class="input-group mb-3">
+  <div class="input-group-append">
+    <input type="number" required class="form-control" id="runs" name="runs" aria-label="Target Runs" aria-describedby="basic-addon2">
+        </div>
+      <div class="input-group-append">
+<button type="button" class="btn btn-orange update" disabled>Target Runs</button>
+  </div>
+        </div>
+            <div class="input-group mb-3">
+  <div class="input-group-append">
+    <input type="number" required class="form-control" id="rbi" name="rbi" aria-label="Target RBI" aria-describedby="basic-addon2">
+        </div>
+      <div class="input-group-append">
+<button type="button" class="btn btn-orange update" disabled>Target RBI</button>
+  </div>
+        </div>        <div class="input-group mb-3">
+  <div class="input-group-append">
+    <input type="number" required class="form-control" id="hrs" name="hrs" aria-label="Target HRs" aria-describedby="basic-addon2">
+        </div>
+      <div class="input-group-append">
+<button type="button" class="btn btn-orange update" disabled>Target HRs</button>
+  </div>
+        </div>        <div class="input-group mb-3">
+  <div class="input-group-append">
+    <input type="number" required class="form-control" id="sbs" name="sbs" aria-label="Target SBs" aria-describedby="basic-addon2">
+        </div>
+      <div class="input-group-append">
+<button type="button" class="btn btn-orange update" disabled>Target SBs</button>
+  </div>
+        </div>        <div class="input-group mb-3">
+  <div class="input-group-append">
+    <input type="number" required class="form-control" id="pitchers" name="pitchers" aria-label="Number Starting Pitchers" aria-describedby="basic-addon2">
+        </div>
+      <div class="input-group-append">
+<button type="button" class="btn btn-orange update" disabled>Number Starting Pitchers</button>
+  </div>
+        </div>        <div class="input-group mb-3">
+  <div class="input-group-append">
+    <input type="number" required class="form-control" id="wins" name="wins" aria-label="Target Wins" aria-describedby="basic-addon2">
+        </div>
+      <div class="input-group-append">
+<button type="button" class="btn btn-orange update" disabled>Target Wins</button>
+  </div>
+        </div>        <div class="input-group mb-3">
+  <div class="input-group-append">
+    <input type="number" required class="form-control" id="era" step="0.01" name="era" aria-label="Target ERA" aria-describedby="basic-addon2">
+        </div>
+      <div class="input-group-append">
+<button type="button" class="btn btn-orange update" disabled>Target ERA</button>
+  </div>
+        </div>        <div class="input-group mb-3">
+  <div class="input-group-append">
+    <input type="number" required class="form-control" id="whip" step="0.01" name="whip" aria-label="Target WHIP" aria-describedby="basic-addon2">
+        </div>
+      <div class="input-group-append">
+<button type="button" class="btn btn-orange update" disabled>Target WHIP</button>
+  </div>
+        </div>        <div class="input-group mb-3">
+  <div class="input-group-append">
+    <input type="number" required class="form-control" id="sos" name="sos" aria-label="Target SOs" aria-describedby="basic-addon2">
+        </div>
+      <div class="input-group-append">
+<button type="button" class="btn btn-orange update" disabled>Target SOs</button>
+  </div>
+        </div>        <div class="input-group mb-3">
+  <div class="input-group-append">
+    <input type="number" required class="form-control" id="saves" name="saves" aria-label="Target Saves" aria-describedby="basic-addon2">
+        </div>
+      <div class="input-group-append">
+<button type="button" class="btn btn-orange update" disabled>Target Saves</button>
+  </div>
+        </div>
+</form>
+{% endblock %}

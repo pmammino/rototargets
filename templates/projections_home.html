@@ -51,7 +51,7 @@
         <!-- Modal footer -->
         <div class="modal-footer">
             <a class="btn btn-orange update" href="/adjustment_view/{{adjustment._id}}">View Adjustments</a>
-            <a class="btn btn-orange update" href="/projection_adjust/{{adjustment._id}}">View Rankings</a>
+            <a class="btn btn-orange update" href="/projection_adjust/{{adjustment._id}}/63dc564929e49408fd54c5e9">View Rankings</a>
             <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
 
         </div>
@@ -103,7 +103,7 @@
         <!-- Modal footer -->
         <div class="modal-footer">
             <a class="btn btn-orange update" href="/target_view/{{target._id}}">View Targets</a>
-            <a class="btn btn-orange update" href="/projection_adjust/{{target._id}}">View Rankings</a>
+            <a class="btn btn-orange update" href="/projection_adjust/{{adjustments[0]._id}}/{{target._id}}">View Rankings</a>
             <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
 
         </div>
@@ -113,6 +113,9 @@
   </div>
 
         {% endfor %}
+                        <div class="row">
+          <a href="/targets" class=" btn btn-orange">Create New</a>
+</div>
 </div>
   </div>
 </div>

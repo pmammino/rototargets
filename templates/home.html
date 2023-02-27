@@ -19,7 +19,7 @@
 </div>
 <form class="adjust" action = "/adjust" method = "post">
     <div class="input-group mb-3">
-  <input type="text" class="form-control" name='adjust_name' value={{default}} aria-label="Adjustment Name" aria-describedby="basic-addon2">
+  <input type="text" class="form-control" name='adjust_name' value='{{default}}' aria-label="Adjustment Name" aria-describedby="basic-addon2">
   <div class="input-group-append">
 <button type="submit" class="btn btn-orange update">Save Updates</button>
   </div>
@@ -27,13 +27,15 @@
                       <select class = "form-control form-control-lg" name="target" id="target">
     {% for target in targets %}
 
-  <option value="{{target._id}}">{{target.target_name}}</option>
+  <option value="{{target._id}}" {{target.selected}}>{{target.target_name}}</option>
     {%endfor%}
 </select>
   <div class="input-group-append">
 <button type="button" class="btn btn-orange update" disabled>Target</button>
   </div>
 </div>
+            <br>
+        <a href="{{path}}" class="btn btn-orange update">Download Rankings</a>
 {% for _, row in stats.iterrows() %}
 {% if row["POSITION"] == "P" %}
 <div class="card mx-auto">
