@@ -6,8 +6,6 @@ import uuid
 
 from bson import ObjectId
 from flask import Flask, render_template, request, session, redirect, url_for,make_response
-import pyexcel as pe
-from io import StringIO
 import requests
 import bcrypt
 import json
