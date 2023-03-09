@@ -63,9 +63,9 @@ def home_page():
     stats = stats[
         ["steamerid", "mlbamid", "firstname", "lastname", "reliability", "SV", "IP", "ERA", "WHIP", "W", "K", "ER",
          "BB", "H"]]
-    stats["Val"] = round((stats["W"] / 9) + (stats["K"] / 150) + (stats["SV"] / 18) + (
-            ((3.85 - stats["ERA"]) / 3.85) * (stats["IP"] / 150)) + (
-                                 ((1.2 - stats["WHIP"]) / 1.2) * (stats["IP"] / 150)), 2)
+    stats["Val"] = round((stats["W"] / 9) + (stats["K"] / 100) + (stats["SV"] / 18) + (
+            ((3.85 - stats["ERA"]) / 3.85) * (stats["IP"] / 100)) + (
+                                 ((1.2 - stats["WHIP"]) / 1.2) * (stats["IP"] / 100)), 2)
     stats = stats.sort_values(by='Val', ascending=False)
     stats = stats[stats.IP > 50].round(3)
     stats["POSITION"] = "P"
@@ -79,7 +79,7 @@ def home_page():
          "POSITION"]]
     stats_hitters["Val"] = round((stats_hitters["R"] / 75) + (stats_hitters["HR"] / 22) + (stats_hitters["SB"] / 15) + (
             stats_hitters["RBI"] / 75) + (((stats_hitters["AVG"] - 0.2692) / 0.2692) * (
-            stats_hitters["AB"] / 500)), 2)
+            stats_hitters["AB"] / 400)), 2)
     stats_hitters = stats_hitters.sort_values(by='Val', ascending=False)
     stats_hitters = stats_hitters[stats_hitters.AB > 200].round(3)
     stats_hitters['Rank'] = stats_hitters['Val'].rank(pct=True).round(3)
@@ -108,8 +108,8 @@ def projections_adjust(adjustment_id,target_id):
          "BB", "H"]]
     stats = stats.rename(columns={"H": "H-P"})
     stats["Val"] = round((stats["W"] / (targets_values.W[0]/targets_values.pitchers[0])) + (stats["K"] / (targets_values.SO[0]/targets_values.pitchers[0])) + (stats["SV"] / (targets_values.SV[0]/(targets_values.pitchers[0] *.4))) + (
-            ((targets_values.ERA[0] - stats["ERA"]) / targets_values.ERA[0]) * (stats["IP"] / 150)) + (
-                                 ((targets_values.WHIP[0] - stats["WHIP"]) / targets_values.WHIP[0]) * (stats["IP"] / 150)), 2)
+            ((targets_values.ERA[0] - stats["ERA"]) / targets_values.ERA[0]) * (stats["IP"] / 100)) + (
+                                 ((targets_values.WHIP[0] - stats["WHIP"]) / targets_values.WHIP[0]) * (stats["IP"] / 100)), 2)
     stats = stats.sort_values(by='Val', ascending=False)
     stats = stats[stats.IP > 50].round(3)
     stats["POSITION"] = "P"
@@ -123,7 +123,7 @@ def projections_adjust(adjustment_id,target_id):
          "POSITION"]]
     stats_hitters["Val"] = round((stats_hitters["R"] / (targets_values.R[0]/targets_values.hitters[0])) + (stats_hitters["HR"] / (targets_values.HR[0]/targets_values.hitters[0])) + (stats_hitters["SB"] / (targets_values.SB[0]/(targets_values.hitters[0]*.6))) + (
             stats_hitters["RBI"] / (targets_values.RBI[0]/targets_values.hitters[0])) + (((stats_hitters["AVG"] - targets_values.AVG[0]) / targets_values.AVG[0]) * (
-            stats_hitters["AB"] / 500)), 2)
+            stats_hitters["AB"] / 400)), 2)
     stats_hitters = stats_hitters.sort_values(by='Val', ascending=False)
     stats_hitters = stats_hitters[stats_hitters.AB > 200].round(3)
     stats_hitters['Rank'] = stats_hitters['Val'].rank(pct=True).round(3)
@@ -184,12 +184,12 @@ def projections_adjust(adjustment_id,target_id):
     stats["HR_Adjust"] = (stats["HR"] / (targets_values.HR[0]/targets_values.hitters[0]))
     stats["SB_Adjust"] = (stats["SB"] / (targets_values.SB[0]/(targets_values.hitters[0]*.5)))
     stats["RBI_Adjust"] = (stats["RBI"] / (targets_values.RBI[0]/targets_values.hitters[0]))
-    stats["AVG_Adjust"] = (((stats["AVG"] - targets_values.AVG) / targets_values.AVG) * (stats["AB"] / 500))
+    stats["AVG_Adjust"] = (((stats["AVG"] - targets_values.AVG) / targets_values.AVG) * (stats["AB"] / 400))
     stats["W_Adjust"] = (stats["W"] / (targets_values.W[0]/targets_values.pitchers[0]))
     stats["K_Adjust"] = (stats["K"] / (targets_values.SO[0]/targets_values.pitchers[0]))
     stats["SV_Adjust"] = (stats["SV"] / (targets_values.W[0]/(targets_values.pitchers[0]*.4)))
-    stats["ERA_Adjust"] = (((targets_values.ERA[0] - stats["ERA"]) / targets_values.ERA[0]) * (stats["IP"] / 150))
-    stats["WHIP_Adjust"] = (((targets_values.WHIP[0] - stats["WHIP"]) / targets_values.WHIP[0]) * (stats["IP"] / 150))
+    stats["ERA_Adjust"] = (((targets_values.ERA[0] - stats["ERA"]) / targets_values.ERA[0]) * (stats["IP"] / 100))
+    stats["WHIP_Adjust"] = (((targets_values.WHIP[0] - stats["WHIP"]) / targets_values.WHIP[0]) * (stats["IP"] / 100))
     stats["Max"] = stats[["R_Adjust",
                           "HR_Adjust",
                           "SB_Adjust",
@@ -202,17 +202,18 @@ def projections_adjust(adjustment_id,target_id):
                           "WHIP_Adjust"]].max(axis=1)
     stats["Val"] = (round((stats["R"] / (targets_values.R[0]/targets_values.hitters[0])) + (stats["HR"] / (targets_values.HR[0]/targets_values.hitters[0])) + (stats["SB"] / (targets_values.SB[0]/(targets_values.hitters[0]*.5))) + (
             stats["RBI"] / (targets_values.RBI[0]/targets_values.hitters[0])) + (((stats["AVG"] - targets_values.AVG) / targets_values.AVG) * (
-            stats["AB"] / 500)), 2) + round((stats["W"] / (targets_values.W[0]/targets_values.pitchers[0])) + (stats["K"] / (targets_values.SO[0]/targets_values.pitchers[0])) + (stats["SV"] / (targets_values.W[0]/(targets_values.pitchers[0]*.4))) + (
-            ((targets_values.ERA[0] - stats["ERA"]) / targets_values.ERA[0]) * (stats["IP"] / 150)) + (
-                                 ((targets_values.WHIP[0] - stats["WHIP"]) / targets_values.WHIP[0]) * (stats["IP"] / 150)), 2)) - (stats["Max"] * ((stats["Max"]/(round((stats["R"] / (targets_values.R[0]/targets_values.hitters[0])) + (stats["HR"] / (targets_values.HR[0]/targets_values.hitters[0])) + (stats["SB"] / (targets_values.SB[0]/(targets_values.hitters[0]*.5))) + (
+            stats["AB"] / 400)), 2) + round((stats["W"] / (targets_values.W[0]/targets_values.pitchers[0])) + (stats["K"] / (targets_values.SO[0]/targets_values.pitchers[0])) + (stats["SV"] / (targets_values.SV[0]/(targets_values.pitchers[0]*.4))) + (
+            ((targets_values.ERA[0] - stats["ERA"]) / targets_values.ERA[0]) * (stats["IP"] / 100)) + (
+                                 ((targets_values.WHIP[0] - stats["WHIP"]) / targets_values.WHIP[0]) * (stats["IP"] / 100)), 2)) - (stats["Max"] * ((stats["Max"]/(round((stats["R"] / (targets_values.R[0]/targets_values.hitters[0])) + (stats["HR"] / (targets_values.HR[0]/targets_values.hitters[0])) + (stats["SB"] / (targets_values.SB[0]/(targets_values.hitters[0]*.5))) + (
             stats["RBI"] / (targets_values.RBI[0]/targets_values.hitters[0])) + (((stats["AVG"] - targets_values.AVG) / targets_values.AVG) * (
-            stats["AB"] / 500)), 2) + round((stats["W"] / (targets_values.W[0]/targets_values.pitchers[0])) + (stats["K"] / (targets_values.SO[0]/targets_values.pitchers[0])) + (stats["SV"] / (targets_values.W[0]/(targets_values.pitchers[0]*.4))) + (
-            ((targets_values.ERA[0] - stats["ERA"]) / targets_values.ERA[0]) * (stats["IP"] / 150)) + (
-                                 ((targets_values.WHIP[0] - stats["WHIP"]) / targets_values.WHIP[0]) * (stats["IP"] / 150)), 2)))))
+            stats["AB"] / 400)), 2) + round((stats["W"] / (targets_values.W[0]/targets_values.pitchers[0])) + (stats["K"] / (targets_values.SO[0]/targets_values.pitchers[0])) + (stats["SV"] / (targets_values.SV[0]/(targets_values.pitchers[0]*.4))) + (
+            ((targets_values.ERA[0] - stats["ERA"]) / targets_values.ERA[0]) * (stats["IP"] / 100)) + (
+                                 ((targets_values.WHIP[0] - stats["WHIP"]) / targets_values.WHIP[0]) * (stats["IP"] / 100)), 2)))))
     stats['Val'] = ((stats.groupby('P_Group')['Val'].rank(pct=True)
                      + stats.groupby('P_Group')['Val'].rank(pct=True)
                      + stats.groupby('P_Group')['Val'].rank(pct=True)
-                     + stats['Val'].rank(pct=True).round(3)) / 4) * 100
+                     + stats.groupby('P_Group')['Val'].rank(pct=True)
+                     + stats['Val'].rank(pct=True).round(3)) / 5) * 100
     stats = stats.sort_values(by='Val', ascending=False).round(3)
     path = "/download/" + adjustment_id + "/" + target_id
     return render_template("home.html", stats=stats,default=default,targets=targets,path=path)
@@ -226,9 +227,9 @@ def adjust_players():
         ["steamerid", "mlbamid", "firstname", "lastname", "reliability", "SV", "IP", "ERA", "WHIP", "W", "K", "ER",
          "BB", "H"]]
     stats = stats.rename(columns={"H": "H-P"})
-    stats["Val"] = round((stats["W"] / 9) + (stats["K"] / 150) + (stats["SV"] / 18) + (
-            ((3.85 - stats["ERA"]) / 3.85) * (stats["IP"] / 150)) + (
-                                 ((1.2 - stats["WHIP"]) / 1.2) * (stats["IP"] / 150)), 2)
+    stats["Val"] = round((stats["W"] / 9) + (stats["K"] / 100) + (stats["SV"] / 18) + (
+            ((3.85 - stats["ERA"]) / 3.85) * (stats["IP"] / 100)) + (
+                                 ((1.2 - stats["WHIP"]) / 1.2) * (stats["IP"] / 100)), 2)
     stats = stats.sort_values(by='Val', ascending=False)
     stats = stats[stats.IP > 50].round(3)
     stats["POSITION"] = "P"
@@ -242,7 +243,7 @@ def adjust_players():
          "POSITION"]]
     stats_hitters["Val"] = round((stats_hitters["R"] / 75) + (stats_hitters["HR"] / 22) + (stats_hitters["SB"] / 15) + (
             stats_hitters["RBI"] / 75) + (((stats_hitters["AVG"] - 0.2692) / 0.2692) * (
-            stats_hitters["AB"] / 500)), 2)
+            stats_hitters["AB"] / 400)), 2)
     stats_hitters = stats_hitters.sort_values(by='Val', ascending=False)
     stats_hitters = stats_hitters[stats_hitters.AB > 200].round(3)
     stats_hitters['Rank'] = stats_hitters['Val'].rank(pct=True).round(3)
@@ -364,8 +365,8 @@ def download(adjustment_id,target_id):
          "BB", "H"]]
     stats = stats.rename(columns={"H": "H-P"})
     stats["Val"] = round((stats["W"] / (targets_values.W[0]/targets_values.pitchers[0])) + (stats["K"] / (targets_values.SO[0]/targets_values.pitchers[0])) + (stats["SV"] / (targets_values.SV[0]/(targets_values.pitchers[0] *.4))) + (
-            ((targets_values.ERA[0] - stats["ERA"]) / targets_values.ERA[0]) * (stats["IP"] / 150)) + (
-                                 ((targets_values.WHIP[0] - stats["WHIP"]) / targets_values.WHIP[0]) * (stats["IP"] / 150)), 2)
+            ((targets_values.ERA[0] - stats["ERA"]) / targets_values.ERA[0]) * (stats["IP"] / 100)) + (
+                                 ((targets_values.WHIP[0] - stats["WHIP"]) / targets_values.WHIP[0]) * (stats["IP"] / 100)), 2)
     stats = stats.sort_values(by='Val', ascending=False)
     stats = stats[stats.IP > 50].round(3)
     stats["POSITION"] = "P"
@@ -379,7 +380,7 @@ def download(adjustment_id,target_id):
          "POSITION"]]
     stats_hitters["Val"] = round((stats_hitters["R"] / (targets_values.R[0]/targets_values.hitters[0])) + (stats_hitters["HR"] / (targets_values.HR[0]/targets_values.hitters[0])) + (stats_hitters["SB"] / (targets_values.SB[0]/(targets_values.hitters[0]*.6))) + (
             stats_hitters["RBI"] / (targets_values.RBI[0]/targets_values.hitters[0])) + (((stats_hitters["AVG"] - targets_values.AVG[0]) / targets_values.AVG[0]) * (
-            stats_hitters["AB"] / 500)), 2)
+            stats_hitters["AB"] / 400)), 2)
     stats_hitters = stats_hitters.sort_values(by='Val', ascending=False)
     stats_hitters = stats_hitters[stats_hitters.AB > 200].round(3)
     stats_hitters['Rank'] = stats_hitters['Val'].rank(pct=True).round(3)
@@ -436,12 +437,40 @@ def download(adjustment_id,target_id):
     stats['down'] = stats['adjustment'].apply(lambda x: 'down' if x < 0 else '')
 
     stats = stats.fillna(0)
-    stats["Val"] = round((stats["R"] / (targets_values.R[0]/targets_values.hitters[0])) + (stats["HR"] / (targets_values.HR[0]/targets_values.hitters[0])) + (stats["SB"] / (targets_values.SB[0]/(targets_values.hitters[0]*.6))) + (
+    stats["R_Adjust"] = (stats["R"] / (targets_values.R[0]/targets_values.hitters[0]))
+    stats["HR_Adjust"] = (stats["HR"] / (targets_values.HR[0]/targets_values.hitters[0]))
+    stats["SB_Adjust"] = (stats["SB"] / (targets_values.SB[0]/(targets_values.hitters[0]*.5)))
+    stats["RBI_Adjust"] = (stats["RBI"] / (targets_values.RBI[0]/targets_values.hitters[0]))
+    stats["AVG_Adjust"] = (((stats["AVG"] - targets_values.AVG) / targets_values.AVG) * (stats["AB"] / 400))
+    stats["W_Adjust"] = (stats["W"] / (targets_values.W[0]/targets_values.pitchers[0]))
+    stats["K_Adjust"] = (stats["K"] / (targets_values.SO[0]/targets_values.pitchers[0]))
+    stats["SV_Adjust"] = (stats["SV"] / (targets_values.W[0]/(targets_values.pitchers[0]*.4)))
+    stats["ERA_Adjust"] = (((targets_values.ERA[0] - stats["ERA"]) / targets_values.ERA[0]) * (stats["IP"] / 100))
+    stats["WHIP_Adjust"] = (((targets_values.WHIP[0] - stats["WHIP"]) / targets_values.WHIP[0]) * (stats["IP"] / 100))
+    stats["Max"] = stats[["R_Adjust",
+                          "HR_Adjust",
+                          "SB_Adjust",
+                          "RBI_Adjust",
+                          "AVG_Adjust",
+                          "W_Adjust",
+                          "K_Adjust",
+                          "SV_Adjust",
+                          "ERA_Adjust",
+                          "WHIP_Adjust"]].max(axis=1)
+    stats["Val"] = (round((stats["R"] / (targets_values.R[0]/targets_values.hitters[0])) + (stats["HR"] / (targets_values.HR[0]/targets_values.hitters[0])) + (stats["SB"] / (targets_values.SB[0]/(targets_values.hitters[0]*.5))) + (
             stats["RBI"] / (targets_values.RBI[0]/targets_values.hitters[0])) + (((stats["AVG"] - targets_values.AVG) / targets_values.AVG) * (
-            stats["AB"] / 500)), 2) + round((stats["W"] / 9) + round((stats["W"] / (targets_values.W[0]/targets_values.pitchers[0])) + (stats["K"] / (targets_values.SO[0]/targets_values.pitchers[0])) + (stats["SV"] / (targets_values.W[0]/(targets_values.pitchers[0]*.4))) + (
-            ((targets_values.ERA[0] - stats["ERA"]) / targets_values.ERA[0]) * (stats["IP"] / 150)) + (
-                                 ((targets_values.WHIP[0] - stats["WHIP"]) / targets_values.WHIP[0]) * (stats["IP"] / 150)), 2))
-    stats['Val'] = ((stats.groupby('P_Group')['Val'].rank(pct=True) + stats['Val'].rank(pct=True).round(3)) / 2) * 100
+            stats["AB"] / 400)), 2) + round((stats["W"] / (targets_values.W[0]/targets_values.pitchers[0])) + (stats["K"] / (targets_values.SO[0]/targets_values.pitchers[0])) + (stats["SV"] / (targets_values.SV[0]/(targets_values.pitchers[0]*.4))) + (
+            ((targets_values.ERA[0] - stats["ERA"]) / targets_values.ERA[0]) * (stats["IP"] / 100)) + (
+                                 ((targets_values.WHIP[0] - stats["WHIP"]) / targets_values.WHIP[0]) * (stats["IP"] / 100)), 2)) - (stats["Max"] * ((stats["Max"]/(round((stats["R"] / (targets_values.R[0]/targets_values.hitters[0])) + (stats["HR"] / (targets_values.HR[0]/targets_values.hitters[0])) + (stats["SB"] / (targets_values.SB[0]/(targets_values.hitters[0]*.5))) + (
+            stats["RBI"] / (targets_values.RBI[0]/targets_values.hitters[0])) + (((stats["AVG"] - targets_values.AVG) / targets_values.AVG) * (
+            stats["AB"] / 400)), 2) + round((stats["W"] / (targets_values.W[0]/targets_values.pitchers[0])) + (stats["K"] / (targets_values.SO[0]/targets_values.pitchers[0])) + (stats["SV"] / (targets_values.SV[0]/(targets_values.pitchers[0]*.4))) + (
+            ((targets_values.ERA[0] - stats["ERA"]) / targets_values.ERA[0]) * (stats["IP"] / 100)) + (
+                                 ((targets_values.WHIP[0] - stats["WHIP"]) / targets_values.WHIP[0]) * (stats["IP"] / 100)), 2)))))
+    stats['Val'] = ((stats.groupby('P_Group')['Val'].rank(pct=True)
+                     + stats.groupby('P_Group')['Val'].rank(pct=True)
+                     + stats.groupby('P_Group')['Val'].rank(pct=True)
+                     + stats.groupby('P_Group')['Val'].rank(pct=True)
+                     + stats['Val'].rank(pct=True).round(3)) / 5) * 100
     stats = stats.sort_values(by='Val', ascending=False).round(3)
     stats = stats[
         ["steamerid", "mlbamid", "firstname", "lastname", "HR", "AB", "AVG", "RBI", "R", "H", "SB",
