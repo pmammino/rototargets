@@ -36,6 +36,7 @@
 </div>
             <br>
         <a href="{{path}}" class="btn btn-orange update">Download Rankings</a>
+    <br>
 {% for _, row in stats.iterrows() %}
 {% if row["POSITION"] == "P" %}
 <div class="card mx-auto">
