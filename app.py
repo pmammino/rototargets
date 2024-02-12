@@ -45,7 +45,7 @@ def get_steamer():
     stats['Rank_All'] = stats['Val'].rank(pct=True).round(3)
     stats['Val'] = (((stats["Rank"] * 2) + stats["Rank_All"]) / 3) * 100
     stats = stats.sort_values(by='Val', ascending=False).round(3)
-    return stats.to_json()
+    return stats.to_json(orient='records')
 
 
 @application.route("/target")
