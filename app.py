@@ -59,9 +59,14 @@ def get_targets():
     stats = stats.sort_values(by='IP', ascending=False)
     stats = stats[stats.IP > 20]
     stats.WHIP = stats.WHIP * -1
-    pitching = stats[["IP", "ERA", "WHIP", "W", "K"]].quantile(.97)
-    SV = stats[["SV"]].quantile(1-(((9*12)*.2)/len(stats.index)))
-    x = 1-(((9*15)*.999)/len(stats.index))
+    stats.ERA = stats.ERA * -1
+    stats_pitchers_head = stats.head(11*12)
+    stats = stats.sort_values(by='SV', ascending=False)
+    stats_pitchers_saves = stats.head(3*12)
+    stats = pd.concat([stats_pitchers_head, stats_pitchers_saves], axis=0, ignore_index=True)
+    pitching = stats[["IP", "ERA", "WHIP", "W", "K"]].quantile(.7)
+    SV = stats[["SV"]].quantile(.8)
+    pitching = pd.concat([pitching, SV], axis=0)
     pitching = pd.DataFrame({'Category': pitching.index, 'Target': pitching.values})
     response_hitters = requests.get("https://www.fangraphs.com/api/steamer/batting?key=5sCxU6kRxvCW8VcN", verify=False)
     data_hitters = response_hitters.json()
@@ -70,10 +75,12 @@ def get_targets():
         ["steamerid", "mlbamid", "firstname", "lastname", "reliability", "HR", "AB", "AVG", "RBI", "R", "H", "SB",
          "POSITION"]]
     stats_hitters = stats_hitters.sort_values(by='AB', ascending=False)
-    stats_hitters_top = stats_hitters.head(14*16)
+    stats_hitters_top = stats_hitters.head(17*12)
     hitting = stats_hitters_top[["HR", "AB", "AVG", "RBI", "R", "SB"]].quantile(.7)
     hitting = pd.DataFrame({'Category': hitting.index, 'Target': hitting.values})
     targets = pd.concat([pitching, hitting], axis=0, ignore_index=True)
+    targets.WHIP = targets.WHIP * -1
+    targets.ERA = targets.ERA * -1
     return targets.to_json(orient='records')
 
 
