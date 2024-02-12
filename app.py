@@ -74,7 +74,7 @@ def get_targets():
     hitting = stats_hitters_top[["HR", "AB", "AVG", "RBI", "R", "SB"]].quantile(.7)
     hitting = pd.DataFrame({'Category': hitting.index, 'Target': hitting.values})
     targets = pd.concat([pitching, hitting], axis=0, ignore_index=True)
-    return targets.to_json()
+    return targets.to_json(orient='records')
 
 
 # Press the green button in the gutter to run the script.
