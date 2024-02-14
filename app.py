@@ -65,6 +65,8 @@ def get_targets():
     stats_pitchers_saves = stats.head(3*12)
     stats = pd.concat([stats_pitchers_head, stats_pitchers_saves], axis=0, ignore_index=True)
     pitching = stats[["IP", "ERA", "WHIP", "W", "K"]].quantile(.7)
+    pitching.WHIP = pitching.WHIP * -1
+    pitching.ERA = pitching.ERA * -1
     SV = stats[["SV"]].quantile(.8)
     pitching = pd.concat([pitching, SV], axis=0)
     pitching = pd.DataFrame({'Category': pitching.index, 'Target': pitching.values})
@@ -79,8 +81,6 @@ def get_targets():
     hitting = stats_hitters_top[["HR", "AB", "AVG", "RBI", "R", "SB"]].quantile(.7)
     hitting = pd.DataFrame({'Category': hitting.index, 'Target': hitting.values})
     targets = pd.concat([pitching, hitting], axis=0, ignore_index=True)
-    targets.WHIP = targets.WHIP * -1
-    targets.ERA = targets.ERA * -1
     return targets.to_json(orient='records')
 
 
