@@ -43,7 +43,7 @@ def get_steamer():
     stats_hitters['Rank'] = stats_hitters['Val'].rank(pct=True).round(3)
     stats = pd.concat([stats, stats_hitters], axis=0, ignore_index=True)
     stats['Rank_All'] = stats['Val'].rank(pct=True).round(3)
-    stats['Val'] = (((stats["Rank"] * 2) + stats["Rank_All"]) / 3) * 100
+    stats['Val'] = (((stats["Rank"] * 4) + stats["Rank_All"]) / 5) * 100
     stats = stats.sort_values(by='Val', ascending=False).round(3)
     return stats.to_json(orient='records')
 
