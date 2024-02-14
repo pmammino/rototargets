@@ -22,8 +22,8 @@ def get_steamer():
         ["steamerid", "mlbamid", "firstname", "lastname", "reliability", "SV", "IP", "ERA", "WHIP", "W", "K", "ER",
          "BB", "H"]]
     stats["Val"] = round((stats["W"] / 10.4) + (stats["K"] / 160) + (stats["SV"] / 26) + (
-            ((3.72 - stats["ERA"]) / 3.72) * (stats["IP"] / 100)) + (
-                                 ((1.19 - stats["WHIP"]) / 1.19) * (stats["IP"] / 100)), 2)
+            ((3.72 - stats["ERA"]) / 3.72) * (stats["IP"] / 150)) + (
+                                 ((1.19 - stats["WHIP"]) / 1.19) * (stats["IP"] / 150)), 2)
     stats = stats.sort_values(by='Val', ascending=False)
     stats = stats[stats.IP > 50].round(3)
     stats["POSITION"] = "P"
@@ -36,8 +36,8 @@ def get_steamer():
         ["steamerid", "mlbamid", "firstname", "lastname", "reliability", "HR", "AB", "AVG", "RBI", "R", "H", "SB",
          "POSITION"]]
     stats_hitters["Val"] = round((stats_hitters["R"] / 80) + (stats_hitters["HR"] / 23) + (stats_hitters["SB"] / 15) + (
-            stats_hitters["RBI"] / 78) + (((stats_hitters["AVG"] - 0.260) / 0.2692) * (
-            stats_hitters["AB"] / 400)), 2)
+            stats_hitters["RBI"] / 78) + (((stats_hitters["AVG"] - 0.2692) / 0.2692) * (
+            stats_hitters["AB"] / 550)), 2)
     stats_hitters = stats_hitters.sort_values(by='Val', ascending=False)
     stats_hitters = stats_hitters[stats_hitters.AB > 200].round(3)
     stats_hitters['Rank'] = stats_hitters['Val'].rank(pct=True).round(3)
