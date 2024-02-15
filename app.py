@@ -9,6 +9,7 @@ import requests
 import json
 import http.client
 import pandas as pd
+import numpy as np
 
 application = Flask(__name__)
 application.secret_key = ''.join(random.choices(string.ascii_uppercase + string.digits, k=8))
