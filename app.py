@@ -83,6 +83,12 @@ def get_targets():
     targets = pd.concat([pitching, hitting], axis=0, ignore_index=True)
     return targets.to_json(orient='records')
 
+@application.route("/score")
+def get_score():
+    x = np.random.uniform(0, 1, 1)
+    return json.dumps(x)
+
+
 
 # Press the green button in the gutter to run the script.
 if __name__ == '__main__':
