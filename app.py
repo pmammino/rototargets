@@ -87,7 +87,7 @@ def get_targets():
 @application.route("/score")
 def get_score():
     x = np.random.uniform(0, 1, 1)
-    return json.dumps(x)
+    return pd.Series(x).to_json(orient='records')
 
 
 
