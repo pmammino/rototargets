@@ -49,8 +49,8 @@ def get_steamer():
     return stats.to_json(orient='records')
 
 
-@application.route("/target")
-def get_targets():
+@application.route("/target/<string:teams>/<string:pitchers>/<string:hitters>")
+def get_targets(teams,pitchers,hitters):
     response = requests.get("https://www.fangraphs.com/api/steamer/pitching?key=5sCxU6kRxvCW8VcN", verify=False)
     data = response.json()
     stats = pd.DataFrame(data)
@@ -61,9 +61,12 @@ def get_targets():
     stats = stats[stats.IP > 20]
     stats.WHIP = stats.WHIP * -1
     stats.ERA = stats.ERA * -1
-    stats_pitchers_head = stats.head(11*12)
+    teams = int(teams)
+    pitchers = int(pitchers)
+    hitters = int(hitters)
+    stats_pitchers_head = stats.head((pitchers+2)*teams)
     stats = stats.sort_values(by='SV', ascending=False)
-    stats_pitchers_saves = stats.head(3*12)
+    stats_pitchers_saves = stats.head(3*teams)
     stats = pd.concat([stats_pitchers_head, stats_pitchers_saves], axis=0, ignore_index=True)
     pitching = stats[["IP", "ERA", "WHIP", "W", "K"]].quantile(.7)
     pitching.WHIP = pitching.WHIP * -1
@@ -78,7 +81,7 @@ def get_targets():
         ["steamerid", "mlbamid", "firstname", "lastname", "reliability", "HR", "AB", "AVG", "RBI", "R", "H", "SB",
          "POSITION"]]
     stats_hitters = stats_hitters.sort_values(by='AB', ascending=False)
-    stats_hitters_top = stats_hitters.head(17*12)
+    stats_hitters_top = stats_hitters.head((hitters+3)*teams)
     hitting = stats_hitters_top[["HR", "AB", "AVG", "RBI", "R", "SB"]].quantile(.7)
     hitting = pd.DataFrame({'Category': hitting.index, 'Target': hitting.values})
     targets = pd.concat([pitching, hitting], axis=0, ignore_index=True)
