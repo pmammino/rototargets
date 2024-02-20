@@ -71,7 +71,7 @@ def get_targets(teams,pitchers,hitters):
     pitching = stats[["IP", "ERA", "WHIP", "W", "K"]].quantile(.7)
     pitching.WHIP = pitching.WHIP * -1
     pitching.ERA = pitching.ERA * -1
-    SV = stats[["SV"]].quantile(.8)
+    SV = stats[["SV"]].quantile(.825) * 3
     pitching = pd.concat([pitching, SV], axis=0)
     pitching = pd.DataFrame({'Category': pitching.index, 'Target': pitching.values})
     response_hitters = requests.get("https://www.fangraphs.com/api/steamer/batting?key=5sCxU6kRxvCW8VcN", verify=False)
