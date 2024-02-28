@@ -87,10 +87,22 @@ def get_targets(teams,pitchers,hitters):
     targets = pd.concat([pitching, hitting], axis=0, ignore_index=True)
     return targets.to_json(orient='records')
 
-@application.route("/score")
-def get_score():
-    x = np.random.uniform(0, 1, 1)
-    return pd.Series(x).to_json(orient='records')
+@application.route("/score/<string:model_id>")
+def get_score(model_id):
+    response = requests.get("https://crowdicate.bubbleapps.io/version-test/api/1.1/obj/predictions")
+    data = response.json()
+    results = pd.DataFrame(data["response"]["results"])
+    while data["response"]["remaining"] > 0:
+        cursor = data["response"]["cursor"] + 100
+        response = requests.get(
+            "https://crowdicate.bubbleapps.io/version-test/api/1.1/obj/predictions" + "?cursor=" + str(
+                cursor) + "&limit=100")
+        data = response.json()
+        test = pd.DataFrame(data["response"]["results"])
+        results = pd.concat([results, test])
+    model = results[results.page_custom_page == model_id]
+    brier = brier_score_loss(model.result1_number, model.prediction_number)
+    return pd.Series(brier).to_json(orient='records')
 
 
 
