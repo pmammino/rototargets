@@ -20,7 +20,7 @@ bcrypt = "*"
 matplotlib = "*"
 numpy = "*"
 plotly = "*"
-sklearn = "*"
+scikit-learn = "*"
 
 [dev-packages]
 pylint = "*"
