@@ -10,6 +10,8 @@ import json
 import http.client
 import pandas as pd
 import numpy as np
+from sklearn.metrics import brier_score_loss
+
 
 application = Flask(__name__)
 application.secret_key = ''.join(random.choices(string.ascii_uppercase + string.digits, k=8))
