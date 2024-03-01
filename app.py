@@ -138,6 +138,28 @@ def get_template(type_id):
         ["_id","amount_number", "player_id_text", "player_text", "Date","prediction"]]
     return template.to_json(orient='records')
 
+@application.route("/predictions/<string:post_id>")
+def get_predictions(post_id):
+    response = requests.get("https://crowdicate.bubbleapps.io/version-test/api/1.1/obj/posts")
+    data = response.json()
+    results = pd.DataFrame(data["response"]["results"])
+    while data["response"]["remaining"] > 0:
+        cursor = data["response"]["cursor"] + 100
+        response = requests.get(
+            "https://crowdicate.bubbleapps.io/version-test/api/1.1/obj/posts" + "?cursor=" + str(
+                cursor) + "&limit=100")
+        data = response.json()
+        test = pd.DataFrame(data["response"]["results"])
+        results = pd.concat([results, test])
+    post = results[results._id == post_id]
+    url = "https:" + post["file_file"].values[0]
+    data = pd.read_csv(url)
+    data["page"] = post["page_text"].values[0]
+    data = data[["predictable","prediction", "page", "date"]]
+    output = make_response(data.to_csv(index=False))
+    output.headers["Content-Disposition"] = "attachment; filename=predictions.csv"
+    output.headers["Content-Type"] = "text/csv"
+    return output
 
 
 # Press the green button in the gutter to run the script.
