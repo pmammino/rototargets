@@ -105,6 +105,42 @@ def get_score(model_id):
     brier = brier_score_loss(model.result1_number, model.prediction_number)
     return pd.Series(brier).to_json(orient='records')
 
+@application.route("/template/<string:type_id>")
+def get_template(type_id):
+    response = requests.get("https://crowdicate.bubbleapps.io/version-test/api/1.1/obj/types")
+    data = response.json()
+    results = pd.DataFrame(data["response"]["results"])
+    while data["response"]["remaining"] > 0:
+        cursor = data["response"]["cursor"] + 100
+        response = requests.get(
+            "https://crowdicate.bubbleapps.io/version-test/api/1.1/obj/types" + "?cursor=" + str(
+                cursor) + "&limit=100")
+        data = response.json()
+        test = pd.DataFrame(data["response"]["results"])
+        results = pd.concat([results, test])
+    name = results[results._id == type_id]
+    name = name["type_text"].values[0]
+    response = requests.get("https://crowdicate.bubbleapps.io/version-test/api/1.1/obj/predictables")
+    data = response.json()
+    results = pd.DataFrame(data["response"]["results"])
+    while data["response"]["remaining"] > 0:
+        cursor = data["response"]["cursor"] + 100
+        response = requests.get(
+            "https://crowdicate.bubbleapps.io/version-test/api/1.1/obj/predictables" + "?cursor=" + str(
+                cursor) + "&limit=100")
+        data = response.json()
+        test = pd.DataFrame(data["response"]["results"])
+        results = pd.concat([results, test])
+    results['Date'] = datetime.date.today()
+    results['prediction'] = ""
+    template = results[results.type_custom_types == type_id]
+    template = template[
+        ["amount_number", "player_id_text", "player_text", "type_custom_types", "Date","prediction"]]
+    output = make_response(template.to_csv(index=False))
+    output.headers["Content-Disposition"] = "attachment; filename=" + name + "_" + str(datetime.date.today()) + ".csv"
+    output.headers["Content-Type"] = "text/csv"
+    return output
+
 
 
 # Press the green button in the gutter to run the script.
