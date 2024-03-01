@@ -136,10 +136,7 @@ def get_template(type_id):
     template = results[results.type_custom_types == type_id]
     template = template[
         ["amount_number", "player_id_text", "player_text", "type_custom_types", "Date","prediction"]]
-    output = make_response(template.to_csv(index=False))
-    output.headers["Content-Disposition"] = "attachment; filename=" + name + "_" + str(datetime.date.today()) + ".csv"
-    output.headers["Content-Type"] = "text/csv"
-    return output
+    return template.to_json(orient='records')
 
 
 
