@@ -101,6 +101,7 @@ def get_score(model_id):
         data = response.json()
         test = pd.DataFrame(data["response"]["results"])
         results = pd.concat([results, test])
+    results = results[results[['result1_number']].notnull().all(1)]
     model = results[results.page_custom_page == model_id]
     brier = brier_score_loss(model.result1_number, model.prediction_number)
     return pd.Series(brier).to_json(orient='records')
