@@ -131,7 +131,7 @@ def get_template(type_id):
         data = response.json()
         test = pd.DataFrame(data["response"]["results"])
         results = pd.concat([results, test])
-    results['Date'] = datetime.date.today()
+    results['Date'] = str(datetime.date.today())
     results['prediction'] = ""
     template = results[results.type_custom_types == type_id]
     template = template[
