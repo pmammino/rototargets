@@ -135,7 +135,7 @@ def get_template(type_id):
     results['prediction'] = ""
     template = results[results.type_custom_types == type_id]
     template = template[
-        ["amount_number", "player_id_text", "player_text", "type_custom_types", "Date","prediction"]]
+        ["_id","amount_number", "player_id_text", "player_text", "Date","prediction"]]
     return template.to_json(orient='records')
 
 
