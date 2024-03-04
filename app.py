@@ -108,6 +108,15 @@ def get_score(model_id):
 
 @application.route("/template/<string:type_id>")
 def get_template(type_id):
+    URL = "https://baseballsavant.mlb.com/probable-pitchers"
+    page = requests.get(URL, verify=False)
+    soup = BeautifulSoup(page.content, "html.parser")
+    links = soup.find_all("a", class_="matchup-link")
+    link_list = []
+    for link in links:
+        test = link["href"]
+        splitting = test.split('player_id=')
+        link_list.append(splitting[1])
     response = requests.get("https://crowdicate.bubbleapps.io/version-test/api/1.1/obj/types")
     data = response.json()
     results = pd.DataFrame(data["response"]["results"])
@@ -135,9 +144,11 @@ def get_template(type_id):
     results['Date'] = str(datetime.date.today())
     results['prediction'] = ""
     template = results[results.type_custom_types == type_id]
+    template = template[template['player_id_text'].isin(link_list)]
     template = template[
         ["_id","amount_number", "player_id_text", "player_text", "Date","prediction"]]
     return template.to_json(orient='records')
+
 
 @application.route("/predictions/<string:post_id>")
 def get_predictions(post_id):
