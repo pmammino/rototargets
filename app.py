@@ -108,15 +108,6 @@ def get_score(model_id):
 
 @application.route("/template/<string:type_id>")
 def get_template(type_id):
-    URL = "https://baseballsavant.mlb.com/probable-pitchers"
-    page = requests.get(URL, verify=False)
-    soup = BeautifulSoup(page.content, "html.parser")
-    links = soup.find_all("a", class_="matchup-link")
-    link_list = []
-    for link in links:
-        test = link["href"]
-        splitting = test.split('player_id=')
-        link_list.append(splitting[1])
     response = requests.get("https://crowdicate.bubbleapps.io/version-test/api/1.1/obj/types")
     data = response.json()
     results = pd.DataFrame(data["response"]["results"])
@@ -130,6 +121,35 @@ def get_template(type_id):
         results = pd.concat([results, test])
     name = results[results._id == type_id]
     name = name["type_text"].values[0]
+    if name == "MLB - Strikeouts":
+        URL = "https://baseballsavant.mlb.com/probable-pitchers"
+        page = requests.get(URL, verify=False)
+        soup = BeautifulSoup(page.content, "html.parser")
+        links = soup.find_all("a", class_="matchup-link")
+        link_list = []
+        for link in links:
+            test = link["href"]
+            splitting = test.split('player_id=')
+            link_list.append(splitting[1])
+    elif name == "MLB - Game Totals":
+        URL = "https://baseballsavant.mlb.com/probable-pitchers"
+        page = requests.get(URL, verify=False)
+        soup = BeautifulSoup(page.content, "html.parser")
+        links = soup.find_all("div", class_="game-info")
+        link_list = []
+        for link in links:
+            link_list.append(link.h2.text.strip())
+    else:
+        URL = "https://baseballsavant.mlb.com/probable-pitchers"
+        page = requests.get(URL, verify=False)
+        soup = BeautifulSoup(page.content, "html.parser")
+        links = soup.find_all("div", class_="game-info")
+        link_list = []
+        for link in links:
+            test = link.h2.text.strip()
+            splitting = test.split(' @ ')
+            link_list.append(splitting[0])
+            link_list.append(splitting[1])
     response = requests.get("https://crowdicate.bubbleapps.io/version-test/api/1.1/obj/predictables")
     data = response.json()
     results = pd.DataFrame(data["response"]["results"])
@@ -144,11 +164,15 @@ def get_template(type_id):
     results['Date'] = str(datetime.date.today())
     results['prediction'] = ""
     template = results[results.type_custom_types == type_id]
-    template = template[template['player_id_text'].isin(link_list)]
+    if name == "MLB - Strikeouts":
+        template = template[template['player_id_text'].isin(link_list)]
+    elif name == "MLB - Game Totals":
+        template = template[template['player_text'].isin(link_list)]
+    else:
+        template = template[template['player_id_text'].isin(link_list)]
     template = template[
         ["_id","amount_number", "player_id_text", "player_text", "Date","prediction"]]
     return template.to_json(orient='records')
-
 
 @application.route("/predictions/<string:post_id>")
 def get_predictions(post_id):
@@ -167,12 +191,13 @@ def get_predictions(post_id):
     url = "https:" + post["file_file"].values[0]
     data = pd.read_csv(url)
     data["page"] = post["page_text"].values[0]
-    data = data[["predictable","prediction", "page", "date"]]
+    data["post"] = post_id
+
+    data = data[["predictable","prediction", "page", "date","post"]]
     output = make_response(data.to_csv(index=False))
     output.headers["Content-Disposition"] = "attachment; filename=predictions.csv"
     output.headers["Content-Type"] = "text/csv"
     return output
-
 
 # Press the green button in the gutter to run the script.
 if __name__ == '__main__':
