@@ -170,7 +170,7 @@ def get_template(type_id):
     elif name == "MLB - Game Totals":
         template = template[template['player_text'].isin(link_list)]
     else:
-        template = template[template['player_id_text'].isin(link_list)]
+        template = template[template['player_text'].isin(link_list)]
     template = template[
         ["_id","amount_number", "player_id_text", "player_text", "Date","prediction"]]
     return template.to_json(orient='records')
