@@ -94,7 +94,7 @@ def get_targets(teams,pitchers,hitters):
 
 @application.route("/score/<string:model_id>")
 def get_score(model_id):
-    con = sqlite3.connect("https://github.com/pmammino/rototargets/blob/main/Crowdicate.db")
+    con = sqlite3.connect("Crowdicate.db")
     cur = con.cursor()
     res = cur.execute("SELECT * FROM Prediction")
     output = res.fetchall()
@@ -150,7 +150,7 @@ def get_template(type_id):
             splitting = test.split(' @ ')
             link_list.append(splitting[0])
             link_list.append(splitting[1])
-    con = sqlite3.connect("https://github.com/pmammino/rototargets/blob/main/Crowdicate.db")
+    con = sqlite3.connect("Crowdicate.db")
     cur = con.cursor()
     res = cur.execute("SELECT * FROM Predictable")
     output = res.fetchall()
@@ -191,7 +191,7 @@ def get_predictions(post_id):
     data = data[["predictable", "prediction", "page", "date", "post"]]
     data["id"] = [uuid.uuid4().hex for _ in range(len(data.index))]
     data = data[["id", "predictable", "date", "page", "post", "prediction"]]
-    con = sqlite3.connect("https://github.com/pmammino/rototargets/blob/main/Crowdicate.db")
+    con = sqlite3.connect("Crowdicate.db")
     cur = con.cursor()
     sqlite_insert_query = """INSERT INTO Prediction
                               (id,predictable,date,page,post,prediction) 
