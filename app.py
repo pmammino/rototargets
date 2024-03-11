@@ -102,7 +102,7 @@ def get_score(model_id):
     results = results[results[['result']].notnull().all(1)]
     model = results[results.page == model_id]
     print(model.head())
-    brier = brier_score_loss(model.result, model.prediction)
+    brier = brier_score_loss(model["result"], model["prediction"])
     return pd.Series(brier).to_json(orient='records')
 
 @application.route("/template/<string:type_id>")
