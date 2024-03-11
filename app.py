@@ -99,6 +99,7 @@ def get_score(model_id):
     res = cur.execute("SELECT * FROM Prediction")
     output = res.fetchall()
     results = pd.DataFrame(list(output), columns=["id", "predictable", "date", "page", "post","prediction","result"])
+    results["result"] = pd.to_numeric(results["result"])
     results = results[results[['result']].notnull().all(1)]
     model = results[results.page == model_id]
     print(model.dtypes)
