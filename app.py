@@ -100,8 +100,8 @@ def get_score(model_id):
     output = res.fetchall()
     results = pd.DataFrame(list(output), columns=["id", "predictable", "date", "page", "post","prediction","result"])
     results = results[results[['result']].notnull().all(1)]
-    results = results[results.result != ""].any()
-    model = results[results.page == model_id].any()
+    results = results[results.result != ""]
+    model = results[results.page == model_id]
     print(model.head())
     brier = brier_score_loss(model.result, model.prediction)
     return pd.Series(brier).to_json(orient='records')
