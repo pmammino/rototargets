@@ -102,8 +102,8 @@ def get_score(model_id):
     results = results[results[['result']].notnull().all(1)]
     results = results[results.result != ""]
     model = results[results.page == model_id]
-    brier = brier_score_loss(model.result, model.prediction)
-    return pd.Series(brier).to_json(orient='records')
+    #brier = brier_score_loss(model.result, model.prediction)
+    return pd.Series(model).to_json(orient='records')
 
 @application.route("/template/<string:type_id>")
 def get_template(type_id):
