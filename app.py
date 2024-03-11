@@ -5,16 +5,19 @@ import datetime
 import uuid
 
 from flask import Flask, render_template, request, session, redirect, url_for,make_response
-from sklearn.metrics import brier_score_loss
 import requests
+import io
 import json
 import http.client
 import pandas as pd
-import numpy as np
+from sklearn.metrics import brier_score_loss
 from bs4 import BeautifulSoup
+import numpy as np
+import sqlite3
 
 application = Flask(__name__)
 application.secret_key = ''.join(random.choices(string.ascii_uppercase + string.digits, k=8))
+
 
 @application.route("/")
 def get_steamer():
@@ -73,7 +76,7 @@ def get_targets(teams,pitchers,hitters):
     pitching = stats[["IP", "ERA", "WHIP", "W", "K"]].quantile(.7)
     pitching.WHIP = pitching.WHIP * -1
     pitching.ERA = pitching.ERA * -1
-    SV = stats[["SV"]].quantile(.825) * 3
+    SV = stats[["SV"]].quantile(.825)
     pitching = pd.concat([pitching, SV], axis=0)
     pitching = pd.DataFrame({'Category': pitching.index, 'Target': pitching.values})
     response_hitters = requests.get("https://www.fangraphs.com/api/steamer/batting?key=5sCxU6kRxvCW8VcN", verify=False)
@@ -91,20 +94,15 @@ def get_targets(teams,pitchers,hitters):
 
 @application.route("/score/<string:model_id>")
 def get_score(model_id):
-    response = requests.get("https://crowdicate.bubbleapps.io/version-test/api/1.1/obj/predictions")
-    data = response.json()
-    results = pd.DataFrame(data["response"]["results"])
-    while data["response"]["remaining"] > 0:
-        cursor = data["response"]["cursor"] + 100
-        response = requests.get(
-            "https://crowdicate.bubbleapps.io/version-test/api/1.1/obj/predictions" + "?cursor=" + str(
-                cursor) + "&limit=100")
-        data = response.json()
-        test = pd.DataFrame(data["response"]["results"])
-        results = pd.concat([results, test])
-    results = results[results[['result1_number']].notnull().all(1)]
-    model = results[results.page_custom_page == model_id]
-    brier = brier_score_loss(model.result1_number, model.prediction_number)
+    con = sqlite3.connect("Crowdicate.db")
+    cur = con.cursor()
+    res = cur.execute("SELECT * FROM Prediction")
+    output = res.fetchall()
+    results = pd.DataFrame(list(output), columns=["id", "predictable", "date", "page", "post","prediction","result"])
+    results = results[results[['result']].notnull().all(1)]
+    results = results[results.result != ""]
+    model = results[results.page == model_id]
+    brier = brier_score_loss(model.result, model.prediction)
     return pd.Series(brier).to_json(orient='records')
 
 @application.route("/template/<string:type_id>")
@@ -151,28 +149,23 @@ def get_template(type_id):
             splitting = test.split(' @ ')
             link_list.append(splitting[0])
             link_list.append(splitting[1])
-    response = requests.get("https://crowdicate.bubbleapps.io/version-test/api/1.1/obj/predictables")
-    data = response.json()
-    results = pd.DataFrame(data["response"]["results"])
-    while data["response"]["remaining"] > 0:
-        cursor = data["response"]["cursor"] + 100
-        response = requests.get(
-            "https://crowdicate.bubbleapps.io/version-test/api/1.1/obj/predictables" + "?cursor=" + str(
-                cursor) + "&limit=100")
-        data = response.json()
-        test = pd.DataFrame(data["response"]["results"])
-        results = pd.concat([results, test])
+    con = sqlite3.connect("Crowdicate.db")
+    cur = con.cursor()
+    res = cur.execute("SELECT * FROM Predictable")
+    output = res.fetchall()
+    results = pd.DataFrame(list(output), columns=["id", "amount", "player", "player_id", "type"])
     results['Date'] = str(datetime.date.today())
     results['prediction'] = ""
-    template = results[results.type_custom_types == type_id]
+    template = results[results.type == name]
     if name == "MLB - Strikeouts":
-        template = template[template['player_id_text'].isin(link_list)]
+        template = template[template['player_id'].isin(link_list)]
     elif name == "MLB - Game Totals":
-        template = template[template['player_text'].isin(link_list)]
+        template = template[template['player'].isin(link_list)]
     else:
-        template = template[template['player_text'].isin(link_list)]
+        template = template[template['player'].isin(link_list)]
     template = template[
-        ["_id","amount_number", "player_id_text", "player_text", "Date","prediction"]]
+        ["id","amount", "player_id", "player", "Date","prediction"]]
+    cur.close()
     return template.to_json(orient='records')
 
 @application.route("/predictions/<string:post_id>")
@@ -194,11 +187,20 @@ def get_predictions(post_id):
     data["page"] = post["page_text"].values[0]
     data["post"] = post_id
 
-    data = data[["predictable","prediction", "page", "date","post"]]
-    output = make_response(data.to_csv(index=False))
-    output.headers["Content-Disposition"] = "attachment; filename=predictions.csv"
-    output.headers["Content-Type"] = "text/csv"
-    return output
+    data = data[["predictable", "prediction", "page", "date", "post"]]
+    data["id"] = [uuid.uuid4().hex for _ in range(len(data.index))]
+    data = data[["id", "predictable", "date", "page", "post", "prediction"]]
+    con = sqlite3.connect("Crowdicate.db")
+    cur = con.cursor()
+    sqlite_insert_query = """INSERT INTO Prediction
+                              (id,predictable,date,page,post,prediction) 
+                              VALUES (?,?,?,?,?,?);"""
+    cur.executemany(sqlite_insert_query, list(data.itertuples(index=False, name=None)))
+    con.commit()
+    cur.close()
+    return "success"
+
+
 
 # Press the green button in the gutter to run the script.
 if __name__ == '__main__':
