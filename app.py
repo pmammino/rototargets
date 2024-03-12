@@ -14,6 +14,8 @@ from sklearn.metrics import brier_score_loss
 from bs4 import BeautifulSoup
 import numpy as np
 import sqlite3
+import mysql.connector
+
 
 application = Flask(__name__)
 application.secret_key = ''.join(random.choices(string.ascii_uppercase + string.digits, k=8))
@@ -94,15 +96,26 @@ def get_targets(teams,pitchers,hitters):
 
 @application.route("/score/<string:model_id>")
 def get_score(model_id):
-    con = sqlite3.connect("Crowdicate.db")
-    cur = con.cursor()
-    res = cur.execute("SELECT * FROM Prediction")
-    output = res.fetchall()
-    results = pd.DataFrame(list(output), columns=["id", "predictable", "date", "page", "post","prediction","result"])
+    cnx = mysql.connector.connect(user = 'doadmin',password = 'AVNS_Lkaktbc2QgJkv-oDi60',
+    host = 'db-mysql-nyc3-89566-do-user-8045222-0.c.db.ondigitalocean.com',
+      port = 25060,
+    database = 'crowdicate')
+    if cnx and cnx.is_connected():
+
+        with cnx.cursor() as cursor:
+
+            result = cursor.execute("SELECT * FROM predictions")
+
+            rows = cursor.fetchall()
+
+        cnx.close()
+
+    else:
+        return print("Could not connect")
+    results = pd.DataFrame(list(rows), columns=["id", "predictable", "date", "page", "post","prediction","result"])
     results["result"] = pd.to_numeric(results["result"])
     results = results[results[['result']].notnull().all(1)]
     model = results[results.page == model_id]
-    print(model.dtypes)
     brier = brier_score_loss(model["result"], model["prediction"])
     return pd.Series(brier).to_json(orient='records')
 
@@ -150,11 +163,23 @@ def get_template(type_id):
             splitting = test.split(' @ ')
             link_list.append(splitting[0])
             link_list.append(splitting[1])
-    con = sqlite3.connect("Crowdicate.db")
-    cur = con.cursor()
-    res = cur.execute("SELECT * FROM Predictable")
-    output = res.fetchall()
-    results = pd.DataFrame(list(output), columns=["id", "amount", "player", "player_id", "type"])
+    cnx = mysql.connector.connect(user='doadmin', password='AVNS_Lkaktbc2QgJkv-oDi60',
+                                  host='db-mysql-nyc3-89566-do-user-8045222-0.c.db.ondigitalocean.com',
+                                  port=25060,
+                                  database='crowdicate')
+    if cnx and cnx.is_connected():
+
+        with cnx.cursor() as cursor:
+
+            result = cursor.execute("SELECT * FROM predictables")
+
+            rows = cursor.fetchall()
+
+        cnx.close()
+
+    else:
+        return print("Could not connect")
+    results = pd.DataFrame(list(rows), columns=["id", "amount", "player", "player_id", "type"])
     results['Date'] = str(datetime.date.today())
     results['prediction'] = ""
     template = results[results.type == name]
@@ -166,7 +191,6 @@ def get_template(type_id):
         template = template[template['player'].isin(link_list)]
     template = template[
         ["id","amount", "player_id", "player", "Date","prediction"]]
-    cur.close()
     return template.to_json(orient='records')
 
 @application.route("/predictions/<string:post_id>")
@@ -192,14 +216,26 @@ def get_predictions(post_id):
     data["id"] = [uuid.uuid4().hex for _ in range(len(data.index))]
     data = data[["id", "predictable", "date", "page", "post", "prediction"]]
     con = sqlite3.connect("Crowdicate.db")
-    cur = con.cursor()
-    sqlite_insert_query = """INSERT INTO Prediction
+    cnx = mysql.connector.connect(user='doadmin', password='AVNS_Lkaktbc2QgJkv-oDi60',
+                                  host='db-mysql-nyc3-89566-do-user-8045222-0.c.db.ondigitalocean.com',
+                                  port=25060,
+                                  database='crowdicate')
+    if cnx and cnx.is_connected():
+
+        with cnx.cursor() as cursor:
+
+            result = cursor.execute("""INSERT INTO prediction
                               (id,predictable,date,page,post,prediction) 
-                              VALUES (?,?,?,?,?,?);"""
-    cur.executemany(sqlite_insert_query, list(data.itertuples(index=False, name=None)))
-    con.commit()
-    cur.close()
-    return "success"
+                              VALUES (?,?,?,?,?,?);""",list(data.itertuples(index=False, name=None)))
+
+            rows = cursor.fetchall()
+
+        cnx.close()
+        return "success"
+
+    else:
+        return print("Could not connect")
+
 
 
 
