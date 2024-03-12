@@ -224,9 +224,9 @@ def get_predictions(post_id):
 
         with cnx.cursor() as cursor:
 
-            result = cursor.execute("""INSERT INTO prediction
+            result = cursor.executemany("""INSERT INTO predictions
                               (id,predictable,date,page,post,prediction) 
-                              VALUES (?,?,?,?,?,?);""",list(data.itertuples(index=False, name=None)))
+                              VALUES (%s,%s,%s,%s,%s,%s);""",list(data.itertuples(index=False, name=None)))
 
             rows = cursor.fetchall()
 
@@ -234,7 +234,7 @@ def get_predictions(post_id):
         return "success"
 
     else:
-        return print("Could not connect")
+        return "Could not connect"
 
 
 
