@@ -224,11 +224,11 @@ def get_predictions(post_id):
 
         with cnx.cursor() as cursor:
 
-            result = cursor.executemany("""INSERT INTO predictions
+            cursor.executemany("""INSERT INTO predictions
                               (id,predictable,date,page,post,prediction) 
                               VALUES (%s,%s,%s,%s,%s,%s);""",list(data.itertuples(index=False, name=None)))
 
-            rows = cursor.fetchall()
+            cnx.commit()
 
         cnx.close()
         return "success"
