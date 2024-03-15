@@ -236,6 +236,58 @@ def get_predictions(post_id):
     else:
         return "Could not connect"
 
+@application.route("/aggregate/<string:post_id>"/"<string:page>"/"<string:type>")
+def get_aggregate(post_id,page,type):
+    response = requests.get("https://crowdicate.bubbleapps.io/version-test/api/1.1/obj/types")
+    data = response.json()
+    results = pd.DataFrame(data["response"]["results"])
+    while data["response"]["remaining"] > 0:
+        cursor = data["response"]["cursor"] + 100
+        response = requests.get(
+            "https://crowdicate.bubbleapps.io/version-test/api/1.1/obj/types" + "?cursor=" + str(
+                cursor) + "&limit=100")
+        data = response.json()
+        test = pd.DataFrame(data["response"]["results"])
+        results = pd.concat([results, test])
+    name = results[results._id == type]
+    name = name["type_text"].values[0]
+    cnx = mysql.connector.connect(user='doadmin', password='AVNS_Lkaktbc2QgJkv-oDi60',
+                              host='db-mysql-nyc3-89566-do-user-8045222-0.c.db.ondigitalocean.com',
+                              port=25060,
+                              database='crowdicate')
+    if cnx and cnx.is_connected():
+        with cnx.cursor() as cursor:
+            result = cursor.execute("SELECT * FROM predictions")
+
+            rows = cursor.fetchall()
+
+            result_b = cursor.execute("SELECT * FROM predictables")
+
+            types = cursor.fetchall()
+
+            results = pd.DataFrame(list(rows),columns=["id", "predictable", "date", "page", "post","prediction","result"])
+            results = results[results['date'] == str(datetime.date.today().strftime("%m/%d/%Y"))]
+            group = results.groupby(['predictable', 'date'])['prediction'].agg({'mean'}).reset_index()
+            predictables = pd.DataFrame(list(types), columns=["id", "amount", "player", "player_id", "type"])
+            group = group.merge(predictables[["id","type"]],how='left', left_on='predictable', right_on='id')
+            group = group[group.type == name]
+            group["id"] = [uuid.uuid4().hex for _ in range(len(group.index))]
+            group["post"] = post_id
+            group["page"] = page
+            group["prediction"] = group["mean"]
+            group = group[["id", "predictable", "date", "page", "post","prediction"]]
+            cursor.executemany("""INSERT INTO predictions
+                                          (id,predictable,date,page,post,prediction) 
+                                          VALUES (%s,%s,%s,%s,%s,%s);""", list(group.itertuples(index=False, name=None)))
+            cnx.commit()
+
+        cnx.close()
+        return "success"
+
+    else:
+        return "Could not connect"
+
+
 
 
 
