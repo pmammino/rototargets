@@ -236,7 +236,7 @@ def get_predictions(post_id):
     else:
         return "Could not connect"
 
-@application.route("/aggregate/<string:post_id>"/"<string:page>"/"<string:type>")
+@application.route("/aggregate/<string:post_id>/<string:page>/<string:type>")
 def get_aggregate(post_id,page,type):
     response = requests.get("https://crowdicate.bubbleapps.io/version-test/api/1.1/obj/types")
     data = response.json()
