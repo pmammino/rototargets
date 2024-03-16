@@ -211,7 +211,7 @@ def get_predictions(post_id):
     data = pd.read_csv(url)
     data["page"] = post["page_text"].values[0]
     data["post"] = post_id
-
+    data["predictable"] = data["id"]
     data = data[["predictable", "prediction", "page", "date", "post"]]
     data["id"] = [uuid.uuid4().hex for _ in range(len(data.index))]
     data = data[["id", "predictable", "date", "page", "post", "prediction"]]
