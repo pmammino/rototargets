@@ -190,7 +190,7 @@ def get_template(type_id):
     else:
         template = template[template['player'].isin(link_list)]
     template = template[
-        ["id","amount", "player_id", "player", "Date","prediction"]]
+        ["id","amount", "player_id", "player", "date","prediction"]]
     return template.to_json(orient='records')
 
 @application.route("/predictions/<string:post_id>")
