@@ -287,8 +287,32 @@ def get_aggregate(post_id,page,type):
     else:
         return "Could not connect"
 
+@application.route("/export_predictions/<string:post_id>")
+def get_predictions(post_id):
+    cnx = mysql.connector.connect(user='doadmin', password='AVNS_Lkaktbc2QgJkv-oDi60',
+                                  host='db-mysql-nyc3-89566-do-user-8045222-0.c.db.ondigitalocean.com',
+                                  port=25060,
+                                  database='crowdicate')
+    if cnx and cnx.is_connected():
+        with cnx.cursor() as cursor:
+            result = cursor.execute("SELECT * FROM predictions")
 
+            rows = cursor.fetchall()
 
+            result2 = cursor.execute("SELECT * FROM predictables")
+
+            rows2 = cursor.fetchall()
+
+        cnx.close()
+
+    results = pd.DataFrame(list(rows), columns=["id", "predictable", "date", "page", "post", "prediction", "result"])
+    predictions = results[results.post == post_id]
+    predictables = pd.DataFrame(list(rows2), columns=["id", "amount", "player", "player_id", "type"])
+    predictions = predictions.merge(predictables[["id", "amount", "player", "player_id"]], how='left',
+                                    left_on='predictable', right_on='id')
+    template = predictions[
+        ["player", "player_id", "amount", "date", "prediction"]]
+    return template.to_json(orient='records')
 
 
 # Press the green button in the gutter to run the script.
