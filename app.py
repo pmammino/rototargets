@@ -180,7 +180,7 @@ def get_template(type_id):
     else:
         return print("Could not connect")
     results = pd.DataFrame(list(rows), columns=["id", "amount", "player", "player_id", "type"])
-    results['Date'] = str(datetime.date.today())
+    results['date'] = str(datetime.date.today())
     results['prediction'] = ""
     template = results[results.type == name]
     if name == "MLB - Strikeouts":
@@ -190,7 +190,7 @@ def get_template(type_id):
     else:
         template = template[template['player'].isin(link_list)]
     template = template[
-        ["id","amount", "player_id", "player", "Date","prediction"]]
+        ["id","amount", "player_id", "player", "date","prediction"]]
     return template.to_json(orient='records')
 
 @application.route("/predictions/<string:post_id>")
@@ -211,7 +211,7 @@ def get_predictions(post_id):
     data = pd.read_csv(url)
     data["page"] = post["page_text"].values[0]
     data["post"] = post_id
-
+    data["predictable"] = data["id"]
     data = data[["predictable", "prediction", "page", "date", "post"]]
     data["id"] = [uuid.uuid4().hex for _ in range(len(data.index))]
     data = data[["id", "predictable", "date", "page", "post", "prediction"]]
