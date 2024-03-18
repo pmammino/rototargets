@@ -287,6 +287,7 @@ def get_aggregate(post_id,page,type):
     else:
         return "Could not connect"
 
+
 @application.route("/export_predictions/<string:post_id>")
 def get_predictions(post_id):
     cnx = mysql.connector.connect(user='doadmin', password='AVNS_Lkaktbc2QgJkv-oDi60',
