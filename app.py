@@ -289,7 +289,7 @@ def get_aggregate(post_id,page,type):
 
 
 @application.route("/export_predictions/<string:post_id>")
-def get_predictions(post_id):
+def export_predictions(post_id):
     cnx = mysql.connector.connect(user='doadmin', password='AVNS_Lkaktbc2QgJkv-oDi60',
                                   host='db-mysql-nyc3-89566-do-user-8045222-0.c.db.ondigitalocean.com',
                                   port=25060,
