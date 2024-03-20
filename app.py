@@ -315,6 +315,27 @@ def export_predictions(post_id):
         ["player", "player_id", "amount", "date", "prediction"]]
     return template.to_json(orient='records')
 
+@application.route("/leaderboard")
+def generate_leaderboard():
+    cnx = mysql.connector.connect(user='doadmin', password='AVNS_Lkaktbc2QgJkv-oDi60',
+                                  host='db-mysql-nyc3-89566-do-user-8045222-0.c.db.ondigitalocean.com',
+                                  port=25060,
+                                  database='crowdicate')
+    if cnx and cnx.is_connected():
+        with cnx.cursor() as cursor:
+            result = cursor.execute("SELECT * FROM predictions")
+
+            rows = cursor.fetchall()
+
+        cnx.close()
+
+    results = pd.DataFrame(list(rows), columns=["id", "predictable", "date", "page", "post", "prediction", "result"])
+    results = results[results[['result']].notnull().all(1)]
+
+    # Grouping DataFrame by 'type' and calculating Brier score for each group
+    brier_scores = results.groupby('page').apply(lambda group: brier_score_loss(group['result'], group['prediction']))
+    return brier_scores.to_json(orient='records')
+
 
 # Press the green button in the gutter to run the script.
 if __name__ == '__main__':
