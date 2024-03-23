@@ -180,7 +180,7 @@ def get_template(type_id):
     else:
         return print("Could not connect")
     results = pd.DataFrame(list(rows), columns=["id", "amount", "player", "player_id", "type"])
-    results['date'] = str(datetime.date.today())
+    results['date'] = str(datetime.date.today().strftime("%m/%d/%Y"))]
     results['prediction'] = ""
     template = results[results.type == name]
     if name == "MLB - Strikeouts":
