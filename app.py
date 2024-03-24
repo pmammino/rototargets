@@ -337,6 +337,7 @@ def generate_leaderboard():
     brier_scores = brier_scores.to_frame()
     brier_scores = brier_scores.rename(columns={0: 'score'})
     brier_scores['page'] = brier_scores.index
+    brier_scores = brier_scores.sort_values(by='score', ascending=True)
     return brier_scores.to_json(orient='records')
 
 
