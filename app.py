@@ -334,6 +334,9 @@ def generate_leaderboard():
 
     # Grouping DataFrame by 'type' and calculating Brier score for each group
     brier_scores = results.groupby('page').apply(lambda group: brier_score_loss(group['result'], group['prediction']))
+    brier_scores = brier_scores.to_frame()
+    brier_scores = brier_scores.rename(columns={0: 'score'})
+    brier_scores['page'] = brier_scores.index
     return brier_scores.to_json(orient='records')
 
 
