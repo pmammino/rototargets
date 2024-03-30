@@ -191,6 +191,7 @@ def get_template(type_id):
         template = template[template['player'].isin(link_list)]
     template = template[
         ["id","amount", "player_id", "player", "date","prediction"]]
+    template = template.sort_values(['player', 'amount'], ascending=[True, True])
     return template.to_json(orient='records')
 
 @application.route("/predictions/<string:post_id>")
