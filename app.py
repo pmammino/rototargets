@@ -314,6 +314,7 @@ def export_predictions(post_id):
                                     left_on='predictable', right_on='id')
     template = predictions[
         ["player", "player_id", "amount", "date", "prediction"]]
+    template = template.sort_values(['player', 'amount'], ascending=[True, True])
     return template.to_json(orient='records')
 
 @application.route("/leaderboard")
