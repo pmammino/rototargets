@@ -121,13 +121,13 @@ def get_score(model_id):
 
 @application.route("/template/<string:type_id>")
 def get_template(type_id):
-    response = requests.get("https://crowdicate.bubbleapps.io/version-test/api/1.1/obj/types")
+    response = requests.get("https://crowdicate.com/api/1.1/obj/types")
     data = response.json()
     results = pd.DataFrame(data["response"]["results"])
     while data["response"]["remaining"] > 0:
         cursor = data["response"]["cursor"] + 100
         response = requests.get(
-            "https://crowdicate.bubbleapps.io/version-test/api/1.1/obj/types" + "?cursor=" + str(
+            "https://crowdicate.com/api/1.1/obj/types" + "?cursor=" + str(
                 cursor) + "&limit=100")
         data = response.json()
         test = pd.DataFrame(data["response"]["results"])
@@ -196,13 +196,13 @@ def get_template(type_id):
 
 @application.route("/predictions/<string:post_id>")
 def get_predictions(post_id):
-    response = requests.get("https://crowdicate.bubbleapps.io/version-test/api/1.1/obj/posts")
+    response = requests.get("https://crowdicate.com/api/1.1/obj/posts")
     data = response.json()
     results = pd.DataFrame(data["response"]["results"])
     while data["response"]["remaining"] > 0:
         cursor = data["response"]["cursor"] + 100
         response = requests.get(
-            "https://crowdicate.bubbleapps.io/version-test/api/1.1/obj/posts" + "?cursor=" + str(
+            "https://crowdicate.com/api/1.1/obj/posts" + "?cursor=" + str(
                 cursor) + "&limit=100")
         data = response.json()
         test = pd.DataFrame(data["response"]["results"])
@@ -239,13 +239,13 @@ def get_predictions(post_id):
 
 @application.route("/aggregate/<string:post_id>/<string:page>/<string:type>")
 def get_aggregate(post_id,page,type):
-    response = requests.get("https://crowdicate.bubbleapps.io/version-test/api/1.1/obj/types")
+    response = requests.get("https://crowdicate.com/api/1.1/obj/types")
     data = response.json()
     results = pd.DataFrame(data["response"]["results"])
     while data["response"]["remaining"] > 0:
         cursor = data["response"]["cursor"] + 100
         response = requests.get(
-            "https://crowdicate.bubbleapps.io/version-test/api/1.1/obj/types" + "?cursor=" + str(
+            "https://crowdicate.com/api/1.1/obj/types" + "?cursor=" + str(
                 cursor) + "&limit=100")
         data = response.json()
         test = pd.DataFrame(data["response"]["results"])
