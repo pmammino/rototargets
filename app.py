@@ -216,7 +216,7 @@ def get_predictions(post_id):
     data = data[["predictable", "prediction", "page", "date", "post"]]
     data["id"] = [uuid.uuid4().hex for _ in range(len(data.index))]
     data = data[["id", "predictable", "date", "page", "post", "prediction"]]
-    data = data.loc[df.notna().all(axis='columns')]
+    data = data.loc[data.notna().all(axis='columns')]
     con = sqlite3.connect("Crowdicate.db")
     cnx = mysql.connector.connect(user='doadmin', password='AVNS_Lkaktbc2QgJkv-oDi60',
                                   host='db-mysql-nyc3-89566-do-user-8045222-0.c.db.ondigitalocean.com',
