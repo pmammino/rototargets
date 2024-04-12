@@ -197,7 +197,7 @@ def get_template(page_id):
     template = results[results['player_id'].isin(link_list) | results['player'].isin(link_list)]
     template = template[
         ["id","amount", "player_id", "player","type", "date","prediction"]]
-    template = template.sort_values(['player', 'amount',"type"], ascending=[True, True,True])
+    template = template.sort_values(["type",'player', 'amount'], ascending=[True, True,True])
     return template.to_json(orient='records')
 
 @application.route("/predictions/<string:post_id>")
@@ -321,7 +321,7 @@ def export_predictions(post_id):
                                     left_on='predictable', right_on='id')
     template = predictions[
         ["player", "player_id", "amount","type", "date", "prediction"]]
-    template = template.sort_values(['player', 'amount'], ascending=[True, True])
+    template = template.sort_values(["type",'player', 'amount'], ascending=[True, True,True])
     return template.to_json(orient='records')
 
 @application.route("/leaderboard")
