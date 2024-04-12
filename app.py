@@ -119,50 +119,59 @@ def get_score(model_id):
     brier = brier_score_loss(model["result"], model["prediction"])
     return pd.Series(brier).to_json(orient='records')
 
-@application.route("/template/<string:type_id>")
-def get_template(type_id):
-    response = requests.get("https://crowdicate.com/api/1.1/obj/types")
+@application.route("/template/<string:page_id>")
+def get_template(page_id):
+    response = requests.get("https://crowdicate.com/api/1.1/obj/page")
     data = response.json()
     results = pd.DataFrame(data["response"]["results"])
     while data["response"]["remaining"] > 0:
         cursor = data["response"]["cursor"] + 100
         response = requests.get(
-            "https://crowdicate.com/api/1.1/obj/types" + "?cursor=" + str(
+            "https://crowdicate.com/api/1.1/obj/page" + "?cursor=" + str(
                 cursor) + "&limit=100")
         data = response.json()
         test = pd.DataFrame(data["response"]["results"])
         results = pd.concat([results, test])
-    name = results[results._id == type_id]
-    name = name["type_text"].values[0]
-    if name == "MLB - Strikeouts":
-        URL = "https://baseballsavant.mlb.com/probable-pitchers"
-        page = requests.get(URL, verify=False)
-        soup = BeautifulSoup(page.content, "html.parser")
-        links = soup.find_all("a", class_="matchup-link")
-        link_list = []
-        for link in links:
-            test = link["href"]
-            splitting = test.split('player_id=')
-            link_list.append(splitting[1])
-    elif name == "MLB - Game Totals":
-        URL = "https://baseballsavant.mlb.com/probable-pitchers"
-        page = requests.get(URL, verify=False)
-        soup = BeautifulSoup(page.content, "html.parser")
-        links = soup.find_all("div", class_="game-info")
-        link_list = []
-        for link in links:
-            link_list.append(link.h2.text.strip())
-    else:
-        URL = "https://baseballsavant.mlb.com/probable-pitchers"
-        page = requests.get(URL, verify=False)
-        soup = BeautifulSoup(page.content, "html.parser")
-        links = soup.find_all("div", class_="game-info")
-        link_list = []
-        for link in links:
-            test = link.h2.text.strip()
-            splitting = test.split(' @ ')
-            link_list.append(splitting[0])
-            link_list.append(splitting[1])
+    response_type = requests.get("https://crowdicate.com/api/1.1/obj/types")
+    data = response_type.json()
+    results_type = pd.DataFrame(data["response"]["results"])
+    while data["response"]["remaining"] > 0:
+        cursor = data["response"]["cursor"] + 100
+        response_type = requests.get(
+            "https://crowdicate.com/api/1.1/obj/types" + "?cursor=" + str(
+                cursor) + "&limit=100")
+        data = response_type.json()
+        test = pd.DataFrame(data["response"]["results"])
+        results_type = pd.concat([results_type, test])
+
+    results = results[results._id == page_id]
+    types = results["type_list_custom_types"].values[0]
+    results_type = results_type[results_type['_id'].isin(types)]
+    URL = "https://baseballsavant.mlb.com/probable-pitchers"
+    page = requests.get(URL, verify=False)
+    soup = BeautifulSoup(page.content, "html.parser")
+    links = soup.find_all("a", class_="matchup-link")
+    link_list = []
+    for link in links:
+        test = link["href"]
+        splitting = test.split('player_id=')
+        link_list.append(splitting[1])
+    URL = "https://baseballsavant.mlb.com/probable-pitchers"
+    page = requests.get(URL, verify=False)
+    soup = BeautifulSoup(page.content, "html.parser")
+    links = soup.find_all("div", class_="game-info")
+    for link in links:
+        link_list.append(link.h2.text.strip())
+    URL = "https://baseballsavant.mlb.com/probable-pitchers"
+    page = requests.get(URL, verify=False)
+    soup = BeautifulSoup(page.content, "html.parser")
+    links = soup.find_all("div", class_="game-info")
+    for link in links:
+        test = link.h2.text.strip()
+        splitting = test.split(' @ ')
+        link_list.append(splitting[0])
+        link_list.append(splitting[1])
+
     cnx = mysql.connector.connect(user='doadmin', password='AVNS_Lkaktbc2QgJkv-oDi60',
                                   host='db-mysql-nyc3-89566-do-user-8045222-0.c.db.ondigitalocean.com',
                                   port=25060,
@@ -178,20 +187,17 @@ def get_template(type_id):
         cnx.close()
 
     else:
-        return print("Could not connect")
+        return ("Could not connect")
     results = pd.DataFrame(list(rows), columns=["id", "amount", "player", "player_id", "type"])
     results['date'] = str(datetime.date.today().strftime("%m/%d/%Y"))
     results['prediction'] = ""
-    template = results[results.type == name]
-    if name == "MLB - Strikeouts":
-        template = template[template['player_id'].isin(link_list)]
-    elif name == "MLB - Game Totals":
-        template = template[template['player'].isin(link_list)]
-    else:
-        template = template[template['player'].isin(link_list)]
+    type_list = results_type['type_text'].tolist()
+
+    results = results[results['type'].isin(type_list)]
+    template = results[results['player_id'].isin(link_list) | results['player'].isin(link_list)]
     template = template[
-        ["id","amount", "player_id", "player", "date","prediction"]]
-    template = template.sort_values(['player', 'amount'], ascending=[True, True])
+        ["id","amount", "player_id", "player","type", "date","prediction"]]
+    template = template.sort_values(['player', 'amount',"type"], ascending=[True, True,True])
     return template.to_json(orient='records')
 
 @application.route("/predictions/<string:post_id>")
@@ -311,10 +317,10 @@ def export_predictions(post_id):
     results = pd.DataFrame(list(rows), columns=["id", "predictable", "date", "page", "post", "prediction", "result"])
     predictions = results[results.post == post_id]
     predictables = pd.DataFrame(list(rows2), columns=["id", "amount", "player", "player_id", "type"])
-    predictions = predictions.merge(predictables[["id", "amount", "player", "player_id"]], how='left',
+    predictions = predictions.merge(predictables[["id", "amount", "player", "player_id","type"]], how='left',
                                     left_on='predictable', right_on='id')
     template = predictions[
-        ["player", "player_id", "amount", "date", "prediction"]]
+        ["player", "player_id", "amount","type", "date", "prediction"]]
     template = template.sort_values(['player', 'amount'], ascending=[True, True])
     return template.to_json(orient='records')
 
