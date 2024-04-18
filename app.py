@@ -274,7 +274,7 @@ def get_aggregate(post_id,page,type):
             types = cursor.fetchall()
 
             results = pd.DataFrame(list(rows),columns=["id", "predictable", "date", "page", "post","prediction","result"])
-            results = results[results['date'] == str(datetime.date.today().strftime("%m/%d/%Y")) | results['date'] == str(datetime.date.today().strftime("%-m/%-d/%Y"))]
+            results = results[results['date'] == str(datetime.date.today().strftime("%m/%d/%Y")) or results['date'] == str(datetime.date.today().strftime("%-m/%-d/%Y"))]
             group = results.groupby(['predictable', 'date'])['prediction'].agg({'mean'}).reset_index()
             predictables = pd.DataFrame(list(types), columns=["id", "amount", "player", "player_id", "type"])
             group = group.merge(predictables[["id","type"]],how='left', left_on='predictable', right_on='id')
