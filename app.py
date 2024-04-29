@@ -324,6 +324,7 @@ def export_predictions(post_id):
     predictables = pd.DataFrame(list(rows2), columns=["id", "amount", "player", "player_id", "type"])
     predictions = predictions.merge(predictables[["id", "amount", "player", "player_id","type"]], how='left',
                                     left_on='predictable', right_on='id')
+    predictions['odds'] = np.where(predictions['prediction'] >= .50, -(100*predictions['prediction'])/(1-predictions['prediction']), (100-(100*predictions['prediction']))/predictions['prediction'])
     template = predictions[
         ["player", "player_id", "amount","type", "date", "prediction"]]
     template = template.sort_values(["type",'player', 'amount'], ascending=[True, True,True])
@@ -351,9 +352,39 @@ def generate_leaderboard():
     brier_scores = brier_scores.to_frame()
     brier_scores = brier_scores.rename(columns={0: 'score'})
     brier_scores['page'] = brier_scores.index
+    brier_scores.reset_index(drop=True, inplace=True)
+    preds = results.groupby('page').count()
+    preds['page_id'] = preds.index
+    brier_scores = brier_scores.merge(preds[["id", "page_id"]], how='left',
+                                      left_on='page', right_on='page_id')
     brier_scores = brier_scores.sort_values(by='score', ascending=True)
+    brier_scores = brier_scores[["score", "page", "id"]]
     return brier_scores.to_json(orient='records')
 
+@application.route("/score_post/<string:post_id>")
+def get_score_post(post_id):
+    cnx = mysql.connector.connect(user = 'doadmin',password = 'AVNS_Lkaktbc2QgJkv-oDi60',
+    host = 'db-mysql-nyc3-89566-do-user-8045222-0.c.db.ondigitalocean.com',
+      port = 25060,
+    database = 'crowdicate')
+    if cnx and cnx.is_connected():
+
+        with cnx.cursor() as cursor:
+
+            result = cursor.execute("SELECT * FROM predictions")
+
+            rows = cursor.fetchall()
+
+        cnx.close()
+
+    else:
+        return print("Could not connect")
+    results = pd.DataFrame(list(rows), columns=["id", "predictable", "date", "page", "post","prediction","result"])
+    results["result"] = pd.to_numeric(results["result"])
+    results = results[results[['result']].notnull().all(1)]
+    model = results[results.post == post_id]
+    brier = brier_score_loss(model["result"], model["prediction"])
+    return pd.Series(brier).to_json(orient='records')
 
 # Press the green button in the gutter to run the script.
 if __name__ == '__main__':
