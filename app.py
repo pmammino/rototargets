@@ -326,7 +326,7 @@ def export_predictions(post_id):
                                     left_on='predictable', right_on='id')
     predictions['odds'] = np.where(predictions['prediction'] >= .50, -(100*predictions['prediction'])/(1-predictions['prediction']), (100-(100*predictions['prediction']))/predictions['prediction'])
     template = predictions[
-        ["player", "player_id", "amount","type", "date", "prediction"]]
+        ["player", "player_id", "amount","type", "date", "prediction","odds"]]
     template = template.sort_values(["type",'player', 'amount'], ascending=[True, True,True])
     return template.to_json(orient='records')
 
