@@ -408,7 +408,6 @@ def bet_finder(post_id):
     # Fetch the data from the API
     response = requests.get(url, params=params)
     data = response.json()
-    response = requests.get("https://rototargets-gnf5o.ondigitalocean.app/export_predictions/" + post_id)
 
     # Extract and flatten markets data
     flattened_markets = []
@@ -462,9 +461,34 @@ def bet_finder(post_id):
     df['Im_Prob'] = np.where(df['outcome_price'] >= 0, 100 / (100 + df['outcome_price']),
                              -df['outcome_price'] / (-df['outcome_price'] + 100))
 
-    data = response.json()
-    predictions = pd.DataFrame(data)
-    predictions_live = df.merge(predictions[["player", "prediction"]], how='left',
+    cnx = mysql.connector.connect(user='doadmin', password='AVNS_Lkaktbc2QgJkv-oDi60',
+                                  host='db-mysql-nyc3-89566-do-user-8045222-0.c.db.ondigitalocean.com',
+                                  port=25060,
+                                  database='crowdicate')
+    if cnx and cnx.is_connected():
+        with cnx.cursor() as cursor:
+            result = cursor.execute("SELECT * FROM predictions")
+
+            rows = cursor.fetchall()
+
+            result2 = cursor.execute("SELECT * FROM predictables")
+
+            rows2 = cursor.fetchall()
+
+        cnx.close()
+
+    results = pd.DataFrame(list(rows), columns=["id", "predictable", "date", "page", "post", "prediction", "result"])
+    predictions = results[results.post == post_id]
+    predictables = pd.DataFrame(list(rows2), columns=["id", "amount", "player", "player_id", "type"])
+    predictions = predictions.merge(predictables[["id", "amount", "player", "player_id", "type"]], how='left',
+                                    left_on='predictable', right_on='id')
+    predictions['odds'] = np.where(predictions['prediction'] >= .50,
+                                   -(100 * predictions['prediction']) / (1 - predictions['prediction']),
+                                   (100 - (100 * predictions['prediction'])) / predictions['prediction'])
+    template = predictions[
+        ["player", "player_id", "amount", "type", "date", "prediction", "odds"]]
+    template = template.sort_values(["type", 'player', 'amount'], ascending=[True, True, True])
+    predictions_live = df.merge(template[["player", "prediction"]], how='left',
                                 left_on='outcome_name', right_on='player')
     predictions_live['diff'] = predictions_live['prediction'] - predictions_live['Im_Prob']
     predictions_live = predictions_live[predictions_live['diff'] > 0]
