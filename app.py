@@ -386,6 +386,86 @@ def get_score_post(post_id):
     brier = brier_score_loss(model["result"], model["prediction"])
     return pd.Series(brier).to_json(orient='records')
 
+@application.route("/bet_finder/<string:post_id>")
+def bet_finder(post_id):
+    # API endpoint and key
+    url = "https://api.the-odds-api.com/v4/sports/baseball_mlb/odds"
+    api_key = "4ba66e1c5d7028fa3011271f95009abc"
+    params = {
+        'apiKey': api_key,
+        'regions': 'us',
+        ##'markets': 'h2h,spreads',
+        'markets': 'h2h',
+        'oddsFormat': 'american'
+    }
+
+    # Fetch the data from the API
+    response = requests.get(url, params=params)
+    data = response.json()
+
+    # Extract and flatten markets data
+    flattened_markets = []
+
+    for entry in data:
+        game_info = {
+            "id": entry["id"],
+            "sport_key": entry["sport_key"],
+            "sport_title": entry["sport_title"],
+            "commence_time": entry["commence_time"],
+            "home_team": entry["home_team"],
+            "away_team": entry["away_team"]
+        }
+        for bookmaker in entry["bookmakers"]:
+            bookmaker_info = {
+                "bookmaker_key": bookmaker["key"],
+                "bookmaker_title": bookmaker["title"]
+            }
+            for market in bookmaker["markets"]:
+                market_info = game_info.copy()
+                market_info.update(bookmaker_info)
+                market_info.update({
+                    "market_key": market["key"],
+                })
+                for outcome in market["outcomes"]:
+                    outcome_info = market_info.copy()
+                    if "point" in outcome:
+                        outcome_info.update({
+                            "outcome_name": outcome["name"],
+                            "outcome_price": outcome["price"],
+                            "outcome_point": outcome["point"]
+                        })
+                    else:
+                        outcome_info.update({
+                            "outcome_name": outcome["name"],
+                            "outcome_price": outcome["price"],
+                            "outcome_point": 0
+                        })
+                    flattened_markets.append(outcome_info)
+
+    # Convert flattened markets data into a DataFrame
+    df = pd.DataFrame(flattened_markets)
+
+    # max_indices = df.groupby(['outcome_name','outcome_point'])['outcome_price'].idxmax()
+    # min_indices = df.groupby(['outcome_name','outcome_point'])['outcome_price'].idxmin()
+
+    # Combine the indices and filter the DataFrame
+    # unique_indices = max_indices.append(min_indices).unique()
+    # filtered_df = df.loc[unique_indices]
+
+    df['Im_Prob'] = np.where(df['outcome_price'] >= 0, 100 / (100 + df['outcome_price']),
+                             -df['outcome_price'] / (-df['outcome_price'] + 100))
+
+    response = requests.get(
+        "https://rototargets-gnf5o.ondigitalocean.app/export_predictions/" + post_id)
+    data = response.json()
+    predictions = pd.DataFrame(data)
+    predictions_live = df.merge(predictions[["player", "prediction"]], how='left',
+                                left_on='outcome_name', right_on='player')
+    predictions_live['diff'] = predictions_live['prediction'] - predictions_live['Im_Prob']
+    predictions_live = predictions_live[predictions_live['diff'] > 0]
+    return predictions_live.to_json(orient='records')
+
+
 # Press the green button in the gutter to run the script.
 if __name__ == '__main__':
     application.run()
