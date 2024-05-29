@@ -461,8 +461,7 @@ def bet_finder(post_id):
     df['Im_Prob'] = np.where(df['outcome_price'] >= 0, 100 / (100 + df['outcome_price']),
                              -df['outcome_price'] / (-df['outcome_price'] + 100))
 
-    response = requests.get(
-        "https://rototargets-gnf5o.ondigitalocean.app/export_predictions/" + post_id)
+    response = requests.get("https://rototargets-gnf5o.ondigitalocean.app/export_predictions/" + post_id)
     data = response.json()
     predictions = pd.DataFrame(data)
     predictions_live = df.merge(predictions[["player", "prediction"]], how='left',
