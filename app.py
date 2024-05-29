@@ -1,7 +1,7 @@
 import operator
 import string
 import random
-import datetime
+from datetime import datetime, timedelta
 import uuid
 
 from flask import Flask, render_template, request, session, redirect, url_for,make_response
@@ -189,7 +189,7 @@ def get_template(page_id):
     else:
         return ("Could not connect")
     results = pd.DataFrame(list(rows), columns=["id", "amount", "player", "player_id", "type"])
-    results['date'] = str(datetime.date.today().strftime("%m/%d/%Y"))
+    results['date'] = str(datetime.today().strftime("%m/%d/%Y"))
     results['prediction'] = ""
     type_list = results_type['type_text'].tolist()
 
@@ -274,12 +274,12 @@ def get_aggregate(post_id,page,type):
             types = cursor.fetchall()
 
             results = pd.DataFrame(list(rows),columns=["id", "predictable", "date", "page", "post","prediction","result"])
-            results1 = results[results['date'] == str(datetime.date.today().strftime("%m/%d/%Y"))]
-            results2 = results[results['date'] == str(datetime.date.today().strftime("%-m/%-d/%Y").lstrip("0").replace(" 0", " "))]
-            results3 = results[results['date'] == str(datetime.date.today().strftime("%-m/%-d/%y").lstrip("0").replace(" 0", " "))]
-            results4 = results[results['date'] == str(datetime.date.today().strftime("%m/%d/%y"))]
+            results1 = results[results['date'] == str(datetime.today().strftime("%m/%d/%Y"))]
+            results2 = results[results['date'] == str(datetime.today().strftime("%-m/%-d/%Y").lstrip("0").replace(" 0", " "))]
+            results3 = results[results['date'] == str(datetime.today().strftime("%-m/%-d/%y").lstrip("0").replace(" 0", " "))]
+            results4 = results[results['date'] == str(datetime.today().strftime("%m/%d/%y"))]
             results = pd.concat([results1,results2,results3,results4])
-            results['date'] = str(datetime.date.today().strftime("%m/%d/%Y"))
+            results['date'] = str(datetime.today().strftime("%m/%d/%Y"))
             group = results.groupby(['predictable','date'])['prediction'].agg({'mean'}).reset_index()
             predictables = pd.DataFrame(list(types), columns=["id", "amount", "player", "player_id", "type"])
             group = group.merge(predictables[["id","type"]],how='left', left_on='predictable', right_on='id')
@@ -391,12 +391,18 @@ def bet_finder(post_id):
     # API endpoint and key
     url = "https://api.the-odds-api.com/v4/sports/baseball_mlb/odds"
     api_key = "4ba66e1c5d7028fa3011271f95009abc"
+    # API endpoint and key
+    url = "https://api.the-odds-api.com/v4/sports/baseball_mlb/odds"
+    api_key = "4ba66e1c5d7028fa3011271f95009abc"
     params = {
         'apiKey': api_key,
         'regions': 'us',
         ##'markets': 'h2h,spreads',
         'markets': 'h2h',
-        'oddsFormat': 'american'
+        'oddsFormat': 'american',
+        'commenceTimeFrom': datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ'),
+        'commenceTimeTo': (datetime.utcnow() + timedelta(days=1)).replace(hour=6, minute=0).strftime(
+            '%Y-%m-%dT%H:%M:%SZ')
     }
 
     # Fetch the data from the API
