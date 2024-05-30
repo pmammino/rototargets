@@ -492,6 +492,7 @@ def bet_finder(post_id):
                                 left_on='outcome_name', right_on='player')
     predictions_live['diff'] = predictions_live['prediction'] - predictions_live['Im_Prob']
     predictions_live = predictions_live[predictions_live['diff'] > 0]
+    predictions_live = predictions_live.sort_values(["diff"], ascending=[False])
     return predictions_live.to_json(orient='records')
 
 
