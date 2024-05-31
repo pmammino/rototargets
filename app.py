@@ -480,7 +480,6 @@ def bet_finder(post_id):
     results = pd.DataFrame(list(rows), columns=["id", "predictable", "date", "page", "post", "prediction", "result"])
     predictions = results[results.post == post_id]
     predictables = pd.DataFrame(list(rows2), columns=["id", "amount", "player", "player_id", "type"])
-    predictions = predictions[predictions['type'] == 'MLB - Moneyline']
     predictions = predictions.merge(predictables[["id", "amount", "player", "player_id", "type"]], how='left',
                                     left_on='predictable', right_on='id')
     predictions['odds'] = np.where(predictions['prediction'] >= .50,
@@ -488,6 +487,7 @@ def bet_finder(post_id):
                                    (100 - (100 * predictions['prediction'])) / predictions['prediction'])
     template = predictions[
         ["player", "player_id", "amount", "type", "date", "prediction", "odds"]]
+    template = template[template['type'] == 'MLB - Moneyline']
     template = template.sort_values(["type", 'player', 'amount'], ascending=[True, True, True])
     predictions_live = df.merge(template[["player", "prediction"]], how='left',
                                 left_on='outcome_name', right_on='player')
