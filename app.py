@@ -480,6 +480,7 @@ def bet_finder(post_id):
     results = pd.DataFrame(list(rows), columns=["id", "predictable", "date", "page", "post", "prediction", "result"])
     predictions = results[results.post == post_id]
     predictables = pd.DataFrame(list(rows2), columns=["id", "amount", "player", "player_id", "type"])
+    predictions = predictions[predictions['type'] == 'MLB - Moneyline']
     predictions = predictions.merge(predictables[["id", "amount", "player", "player_id", "type"]], how='left',
                                     left_on='predictable', right_on='id')
     predictions['odds'] = np.where(predictions['prediction'] >= .50,
