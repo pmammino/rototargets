@@ -22,6 +22,7 @@ numpy = "*"
 plotly = "*"
 scikit-learn = "*"
 mysql-connector-python = "*"
+pybaseball = "*"
 
 [dev-packages]
 pylint = "*"

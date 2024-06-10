@@ -15,7 +15,8 @@ from bs4 import BeautifulSoup
 import numpy as np
 import sqlite3
 import mysql.connector
-
+from sklearn.ensemble import RandomForestRegressor
+from pybaseball import pitching_stats, team_batting, playerid_reverse_lookup
 
 application = Flask(__name__)
 application.secret_key = ''.join(random.choices(string.ascii_uppercase + string.digits, k=8))
@@ -496,8 +497,184 @@ def bet_finder(post_id):
     predictions_live = predictions_live.sort_values(["diff"], ascending=[False])
     return predictions_live.to_json(orient='records')
 
+@application.route("/predict_model/<string:post_id>/<string:page_id>/<string:model_id>")
+def predict_model(post_id,page_id,model_id):
+    response = requests.get("https://crowdicate.com/api/1.1/obj/models")
+    data = response.json()
+    results = pd.DataFrame(data["response"]["results"])
+    while data["response"]["remaining"] > 0:
+        cursor = data["response"]["cursor"] + 100
+        response = requests.get(
+            "https://crowdicate.com/api/1.1/obj/models" + "?cursor=" + str(
+                cursor) + "&limit=100")
+        data = response.json()
+        test = pd.DataFrame(data["response"]["results"])
+        results = pd.concat([results, test])
+
+    results = results[results._id == model_id]
+    metrics = results["metrics_list_text"].values[0]
+    trees = results["trees_number"].values[0]
+    hit_number = results["hit_number"].values[0]
+    pitch_number = results["pitch_number"].values[0]
+
+    URL = "https://baseballsavant.mlb.com/probable-pitchers"
+    page = requests.get(URL, verify=False)
+    soup = BeautifulSoup(page.content, "html.parser")
+    links = soup.find_all("a", class_="matchup-link")
+    link_list = []
+    for link in links:
+        test = link["href"]
+        splitting = test.split('teamPitching=')
+        splitting2 = splitting[1].split('&teamBatting=')
+        splitting = splitting2[1].split('&player_id=')
+        link_list.append([splitting2[0], splitting[0], splitting[1]])
+
+    df = pd.DataFrame(link_list, columns=['Pitch Team', 'Hit Team', 'Pitcher'])
+    df = df.drop_duplicates()
+
+    hit = metrics.copy()
+    hit.append("Team")
+    pitch = metrics.copy()
+    pitch.append("IDfg")
+
+    data = pitching_stats(2024, 2024, qual=0)
+    data = data[pitch]
+    team_data = team_batting(2024, 2024)
+    team_data["K-BB%"] = team_data["K%"] - team_data["BB%"]
+    team_data = team_data[hit]
+
+    teams = pd.read_csv("teams.csv")
+    ids = pd.read_csv("razzball.csv")
+    df['Pitch Team'] = df['Pitch Team'].astype(str)
+    df['Hit Team'] = df['Hit Team'].astype(str)
+    df['Pitcher'] = df['Pitcher'].astype(str)
+    ids['MLBAMID'] = ids['MLBAMID'].astype(str)
+    ids['FanGraphsID'] = ids['FanGraphsID'].astype(str)
+    data['IDfg'] = data['IDfg'].astype(str)
+
+
+    df = df.merge(ids[["MLBAMID", 'FanGraphsID']], how='left',
+                  left_on=['Pitcher'], right_on=['MLBAMID'])
+
+    teams["team_id"] = teams["team_id"].astype(str)
+
+    df = df.merge(teams, how='left',
+                  left_on=['Pitch Team'], right_on=['team_id'])
+    df = df.merge(teams, how='left',
+                  left_on=['Hit Team'], right_on=['team_id'])
+
+    df = df.merge(data, how='left',
+                  left_on=['FanGraphsID'], right_on=['IDfg'])
+    df = df.merge(team_data, how='left',
+                  left_on=['team_abv_y'], right_on=['Team'])
+
+    p_list = [x + "_x" for x in metrics]
+    h_list = [x + "_y" for x in metrics]
+
+    for i in range(len(metrics)):
+        df[metrics[i]] = (df[p_list[i]] * pitch_number) + (df[h_list[i]] * hit_number)
+
+    games = pd.read_csv("games_data.csv")
+
+    x = games.loc[:,
+        metrics].values
+    y = games.loc[:, 'R'].values
+
+    regressor = RandomForestRegressor(n_estimators=trees, random_state=0, oob_score=True)
+
+    regressor.fit(x, y)
+
+    df = df.dropna()
+    predictions = regressor.predict(df[metrics])
+    df["pred"] = predictions
+
+    games = df[["Hit Team", "Pitch Team", "pred"]].merge(df[["Hit Team", "Pitch Team", "pred"]], how='left',
+                                                         left_on=['Pitch Team'], right_on=['Hit Team'])
+
+    games["WP"] = ((games["pred_x"] - games["pred_y"]) / 10) + 0.5
+
+    moneyline = games[["Hit Team_x", "WP"]].merge(teams[["team_id", "player_id"]], how='left',
+                                                  left_on=['Hit Team_x'], right_on=['team_id'])
+
+    URL = "https://baseballsavant.mlb.com/probable-pitchers"
+    page = requests.get(URL, verify=False)
+    soup = BeautifulSoup(page.content, "html.parser")
+    links = soup.find_all("a", class_="matchup-link")
+    link_list = []
+    for link in links:
+        test = link["href"]
+        splitting = test.split('player_id=')
+        link_list.append(splitting[1])
+    URL = "https://baseballsavant.mlb.com/probable-pitchers"
+    page = requests.get(URL, verify=False)
+    soup = BeautifulSoup(page.content, "html.parser")
+    links = soup.find_all("div", class_="game-info")
+    for link in links:
+        link_list.append(link.h2.text.strip())
+    URL = "https://baseballsavant.mlb.com/probable-pitchers"
+    page = requests.get(URL, verify=False)
+    soup = BeautifulSoup(page.content, "html.parser")
+    links = soup.find_all("div", class_="game-info")
+    for link in links:
+        test = link.h2.text.strip()
+        splitting = test.split(' @ ')
+        link_list.append(splitting[0])
+        link_list.append(splitting[1])
+
+    cnx = mysql.connector.connect(user='doadmin', password='AVNS_Lkaktbc2QgJkv-oDi60',
+                                  host='db-mysql-nyc3-89566-do-user-8045222-0.c.db.ondigitalocean.com',
+                                  port=25060,
+                                  database='crowdicate')
+    if cnx and cnx.is_connected():
+        with cnx.cursor() as cursor:
+            result = cursor.execute("SELECT * FROM predictables")
+
+            rows = cursor.fetchall()
+
+            results = pd.DataFrame(list(rows), columns=["id", "amount", "player", "player_id", "type"])
+            results['date'] = str(datetime.today().strftime("%m/%d/%Y"))
+            results['prediction'] = ""
+            type_list = ["MLB - Moneyline"]
+
+            results = results[results['type'].isin(type_list)]
+            template = results[results['player_id'].isin(link_list) | results['player'].isin(link_list)]
+            template = template[
+                ["id", "amount", "player_id", "player", "type", "date", "prediction"]]
+            template = template.sort_values(["type", 'player', 'amount'], ascending=[True, True, True])
+
+            template = template.merge(moneyline, how="left")
+            template["prediction"] = template["WP"]
+            template = template[template[['prediction']].notnull().all(1)]
+            group = template
+            group["predictable"] = group["id"]
+            group["id"] = [uuid.uuid4().hex for _ in range(len(group.index))]
+            group["post"] = page_id
+            group["page"] = post_id
+            group = group[["id", "predictable", "date", "page", "post", "prediction"]]
+            cursor.executemany("""INSERT INTO predictions
+                                      (id,predictable,date,page,post,prediction) 
+                                      VALUES (%s,%s,%s,%s,%s,%s);""", list(group.itertuples(index=False, name=None)))
+            cnx.commit()
+
+            cnx.close()
+
+        cnx = mysql.connector.connect(user='doadmin', password='AVNS_Lkaktbc2QgJkv-oDi60',
+                                  host='db-mysql-nyc3-89566-do-user-8045222-0.c.db.ondigitalocean.com',
+                                  port=25060,
+                                  database='crowdicate')
+        if cnx and cnx.is_connected():
+            with cnx.cursor() as cursor:
+                result = cursor.execute("SELECT * FROM predictions")
+
+                rows = cursor.fetchall()
+
+        cnx.close()
+        return "success"
+    else:
+        return "Could not connect"
+
+
 
 # Press the green button in the gutter to run the script.
 if __name__ == '__main__':
     application.run()
-
