@@ -648,8 +648,8 @@ def predict_model(post_id,page_id,model_id):
             group = template
             group["predictable"] = group["id"]
             group["id"] = [uuid.uuid4().hex for _ in range(len(group.index))]
-            group["post"] = page_id
-            group["page"] = post_id
+            group["post"] = post_id
+            group["page"] = page_id
             group = group[["id", "predictable", "date", "page", "post", "prediction"]]
             cursor.executemany("""INSERT INTO predictions
                                       (id,predictable,date,page,post,prediction) 
