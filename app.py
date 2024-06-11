@@ -657,18 +657,6 @@ def predict_model(post_id,page_id,model_id):
             cnx.commit()
 
             cnx.close()
-
-        cnx = mysql.connector.connect(user='doadmin', password='AVNS_Lkaktbc2QgJkv-oDi60',
-                                  host='db-mysql-nyc3-89566-do-user-8045222-0.c.db.ondigitalocean.com',
-                                  port=25060,
-                                  database='crowdicate')
-        if cnx and cnx.is_connected():
-            with cnx.cursor() as cursor:
-                result = cursor.execute("SELECT * FROM predictions")
-
-                rows = cursor.fetchall()
-
-        cnx.close()
         return "success"
     else:
         return "Could not connect"
