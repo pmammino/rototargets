@@ -537,7 +537,7 @@ def predict_model(post_id,page_id,model_id):
     pitch = metrics.copy()
     pitch.append("IDfg")
 
-    data = pitching_stats(2024, 2024, qual=0)
+    data = pitching_stats(2024, 2024, qual=5)
     data = data[pitch]
     team_data = team_batting(2024, 2024)
     team_data["K-BB%"] = team_data["K%"] - team_data["BB%"]
