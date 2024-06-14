@@ -331,15 +331,17 @@ def export_predictions(post_id):
     template = template.sort_values(["type",'player', 'amount'], ascending=[True, True,True])
     return template.to_json(orient='records')
 
-@application.route("/leaderboard")
-def generate_leaderboard():
+@application.route("/leaderboard/<string:days>")
+def generate_leaderboard(days):
     cnx = mysql.connector.connect(user='doadmin', password='AVNS_Lkaktbc2QgJkv-oDi60',
                                   host='db-mysql-nyc3-89566-do-user-8045222-0.c.db.ondigitalocean.com',
                                   port=25060,
                                   database='crowdicate')
     if cnx and cnx.is_connected():
         with cnx.cursor() as cursor:
-            result = cursor.execute("SELECT * FROM predictions")
+            result = cursor.execute("SELECT * FROM predictions WHERE STR_TO_DATE(date, '%m/%d/%Y') BETWEEN DATE_SUB(NOW(), INTERVAL "
+            + days + "DAY) AND NOW()"
+                                    )
 
             rows = cursor.fetchall()
 
