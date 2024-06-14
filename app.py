@@ -340,7 +340,7 @@ def generate_leaderboard(days):
     if cnx and cnx.is_connected():
         with cnx.cursor() as cursor:
             result = cursor.execute("SELECT * FROM predictions WHERE STR_TO_DATE(date, '%m/%d/%Y') BETWEEN DATE_SUB(NOW(), INTERVAL "
-            + days + "DAY) AND NOW()"
+            + days + " DAY) AND NOW()"
                                     )
 
             rows = cursor.fetchall()
