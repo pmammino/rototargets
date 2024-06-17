@@ -543,6 +543,10 @@ def predict_model(post_id,page_id,model_id):
     data = data[pitch]
     team_data = team_batting(2024, 2024)
     team_data["K-BB%"] = team_data["K%"] - team_data["BB%"]
+    team_data["Inn"] = (team_data['PA'] - team_data['H'] - team_data['BB'] - team_data['HBP']) / 3
+    team_data['K/9'] = (team_data['SO'] / team_data['Inn']) * 9
+    team_data["BB/9"] = (team_data['BB'] / team_data['Inn']) * 9
+    team_data["HR/9"] = (team_data['HR'] / team_data['Inn']) * 9
     team_data = team_data[hit]
 
     teams = pd.read_csv("teams.csv")
