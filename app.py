@@ -667,7 +667,7 @@ def predict_model(post_id,page_id,model_id):
     else:
         return "Could not connect"
 
-@application.route("/market_predict/<string:post_id>/<string:page>/<string:type>")
+@application.route("/market_predict/<string:post_id>/<string:page_id>/<string:type>")
 def market_predict(post_id,page_id,type):
     response = requests.get("https://crowdicate.com/api/1.1/obj/types")
     data = response.json()
