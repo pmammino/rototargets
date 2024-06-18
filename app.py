@@ -668,7 +668,7 @@ def predict_model(post_id,page_id,model_id):
         return "Could not connect"
 
 @application.route("/market_predict/<string:post_id>/<string:page>/<string:type>")
-def market_predict(post_id,page,type):
+def market_predict(post_id,page_id,type):
     response = requests.get("https://crowdicate.com/api/1.1/obj/types")
     data = response.json()
     results = pd.DataFrame(data["response"]["results"])
@@ -810,7 +810,7 @@ def market_predict(post_id,page,type):
 
             template = template.merge(group, how='left', left_on='player', right_on='outcome_name')
             template["post"] = post_id
-            template["page"] = page
+            template["page"] = page_id
             template['prediction'] = template['mean']
             template['predictable'] = template["id"]
             template["id"] = [uuid.uuid4().hex for _ in range(len(template.index))]
