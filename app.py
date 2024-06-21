@@ -543,6 +543,10 @@ def predict_model(post_id,page_id,model_id):
     data = data[pitch]
     team_data = team_batting(2024, 2024)
     team_data["K-BB%"] = team_data["K%"] - team_data["BB%"]
+    team_data["Inn"] = (team_data['PA'] - team_data['H'] - team_data['BB'] - team_data['HBP']) / 3
+    team_data['K/9'] = (team_data['SO'] / team_data['Inn']) * 9
+    team_data["BB/9"] = (team_data['BB'] / team_data['Inn']) * 9
+    team_data["HR/9"] = (team_data['HR'] / team_data['Inn']) * 9
     team_data = team_data[hit]
 
     teams = pd.read_csv("teams.csv")
@@ -663,6 +667,166 @@ def predict_model(post_id,page_id,model_id):
     else:
         return "Could not connect"
 
+@application.route("/market_predict/<string:post_id>/<string:page_id>/<string:type>")
+def market_predict(post_id,page_id,type):
+    response = requests.get("https://crowdicate.com/api/1.1/obj/types")
+    data = response.json()
+    results = pd.DataFrame(data["response"]["results"])
+    while data["response"]["remaining"] > 0:
+        cursor = data["response"]["cursor"] + 100
+        response = requests.get(
+            "https://crowdicate.com/api/1.1/obj/types" + "?cursor=" + str(
+                cursor) + "&limit=100")
+        data = response.json()
+        test = pd.DataFrame(data["response"]["results"])
+        results = pd.concat([results, test])
+    name = results[results._id == type]
+    name = name["type_text"].values[0]
+
+    URL = "https://baseballsavant.mlb.com/probable-pitchers"
+    page = requests.get(URL, verify=False)
+    soup = BeautifulSoup(page.content, "html.parser")
+    links = soup.find_all("a", class_="matchup-link")
+    link_list = []
+    for link in links:
+        test = link["href"]
+        splitting = test.split('player_id=')
+        link_list.append(splitting[1])
+    URL = "https://baseballsavant.mlb.com/probable-pitchers"
+    page = requests.get(URL, verify=False)
+    soup = BeautifulSoup(page.content, "html.parser")
+    links = soup.find_all("div", class_="game-info")
+    for link in links:
+        link_list.append(link.h2.text.strip())
+    URL = "https://baseballsavant.mlb.com/probable-pitchers"
+    page = requests.get(URL, verify=False)
+    soup = BeautifulSoup(page.content, "html.parser")
+    links = soup.find_all("div", class_="game-info")
+    for link in links:
+        test = link.h2.text.strip()
+        splitting = test.split(' @ ')
+        link_list.append(splitting[0])
+        link_list.append(splitting[1])
+
+    # API endpoint and key
+    url = "https://api.the-odds-api.com/v4/sports/baseball_mlb/odds"
+    api_key = "4ba66e1c5d7028fa3011271f95009abc"
+    # API endpoint and key
+    url = "https://api.the-odds-api.com/v4/sports/baseball_mlb/odds"
+    api_key = "4ba66e1c5d7028fa3011271f95009abc"
+    params = {
+        'apiKey': api_key,
+        'regions': 'us',
+        ##'markets': 'h2h,spreads',
+        'markets': 'h2h',
+        'oddsFormat': 'american',
+        'commenceTimeFrom': datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ'),
+        'commenceTimeTo': (datetime.utcnow() + timedelta(days=1)).replace(hour=6, minute=0).strftime(
+            '%Y-%m-%dT%H:%M:%SZ')
+    }
+
+    # Fetch the data from the API
+    response = requests.get(url, params=params)
+    data = response.json()
+
+    # Extract and flatten markets data
+    flattened_markets = []
+
+    for entry in data:
+        game_info = {
+            "id": entry["id"],
+            "sport_key": entry["sport_key"],
+            "sport_title": entry["sport_title"],
+            "commence_time": entry["commence_time"],
+            "home_team": entry["home_team"],
+            "away_team": entry["away_team"]
+        }
+        for bookmaker in entry["bookmakers"]:
+            bookmaker_info = {
+                "bookmaker_key": bookmaker["key"],
+                "bookmaker_title": bookmaker["title"]
+            }
+            for market in bookmaker["markets"]:
+                market_info = game_info.copy()
+                market_info.update(bookmaker_info)
+                market_info.update({
+                    "market_key": market["key"],
+                })
+                for outcome in market["outcomes"]:
+                    outcome_info = market_info.copy()
+                    if "point" in outcome:
+                        outcome_info.update({
+                            "outcome_name": outcome["name"],
+                            "outcome_price": outcome["price"],
+                            "outcome_point": outcome["point"]
+                        })
+                    else:
+                        outcome_info.update({
+                            "outcome_name": outcome["name"],
+                            "outcome_price": outcome["price"],
+                            "outcome_point": 0
+                        })
+                    flattened_markets.append(outcome_info)
+
+        # Convert flattened markets data into a DataFrame
+        df = pd.DataFrame(flattened_markets)
+
+        # max_indices = df.groupby(['outcome_name','outcome_point'])['outcome_price'].idxmax()
+        # min_indices = df.groupby(['outcome_name','outcome_point'])['outcome_price'].idxmin()
+
+        # Combine the indices and filter the DataFrame
+        # unique_indices = max_indices.append(min_indices).unique()
+        # filtered_df = df.loc[unique_indices]
+
+        df['Im_Prob'] = np.where(df['outcome_price'] >= 0, 100 / (100 + df['outcome_price']),
+                                 -df['outcome_price'] / (-df['outcome_price'] + 100))
+
+    cnx = mysql.connector.connect(user='doadmin', password='AVNS_Lkaktbc2QgJkv-oDi60',
+                                  host='db-mysql-nyc3-89566-do-user-8045222-0.c.db.ondigitalocean.com',
+                                  port=25060,
+                                  database='crowdicate')
+    if cnx and cnx.is_connected():
+        with cnx.cursor() as cursor:
+            result = cursor.execute("SELECT * FROM predictables")
+
+            rows = cursor.fetchall()
+
+            result_b = cursor.execute("SELECT * FROM predictables")
+
+            types = cursor.fetchall()
+
+            results = pd.DataFrame(list(rows), columns=["id", "amount", "player", "player_id", "type"])
+            results['date'] = str(datetime.today().strftime("%m/%d/%Y"))
+            results['prediction'] = ""
+            type_list = [name]
+
+            results = results[results['type'].isin(type_list)]
+            template = results[results['player_id'].isin(link_list) | results['player'].isin(link_list)]
+            template = template[
+                ["id", "amount", "player_id", "player", "type", "date", "prediction"]]
+            template = template.sort_values(["type", 'player', 'amount'], ascending=[True, True, True])
+
+            group = df.groupby(['outcome_name'])['Im_Prob'].agg({'mean'}).reset_index()
+
+            template = template.merge(group, how='left', left_on='player', right_on='outcome_name')
+            template["post"] = post_id
+            template["page"] = page_id
+            template['prediction'] = template['mean']
+            template['predictable'] = template["id"]
+            template["id"] = [uuid.uuid4().hex for _ in range(len(template.index))]
+
+            template = template[["id", "predictable", "date", "page", "post", "prediction"]]
+
+            cursor.executemany("""INSERT INTO predictions
+                                              (id,predictable,date,page,post,prediction) 
+                                              VALUES (%s,%s,%s,%s,%s,%s);""",
+                               list(template.itertuples(index=False, name=None)))
+            cnx.commit()
+
+        cnx.close()
+        return "success"
+    else:
+        return "Could not connect"
 
 
 # Press the green button in the gutter to run the script.
