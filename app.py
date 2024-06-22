@@ -598,9 +598,9 @@ def predict_model(post_id,page_id,model_id):
                                                          left_on=['Pitch Team'], right_on=['Hit Team'])
 
     games["WP"] = ((games["pred_x"] - games["pred_y"]) / 10) + 0.5
-    games['WP'] = np.where(df['WP'] >= 0.9, 0.9,
+    games['WP'] = np.where(games['WP'] >= 0.9, 0.9,
                              games['WP'])
-    games['WP'] = np.where(df['WP'] <= 0.1, 0.1,
+    games['WP'] = np.where(games['WP'] <= 0.1, 0.1,
                              games['WP'])
 
     moneyline = games[["Hit Team_x", "WP"]].merge(teams[["team_id", "player_id"]], how='left',
