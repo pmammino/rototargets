@@ -393,10 +393,10 @@ def get_score_post(post_id):
 def bet_finder(post_id):
     # API endpoint and key
     url = "https://api.the-odds-api.com/v4/sports/baseball_mlb/odds"
-    api_key = "4ba66e1c5d7028fa3011271f95009abc"
+    api_key = "22a6282c9744177b06acb842d34a02cb"
     # API endpoint and key
     url = "https://api.the-odds-api.com/v4/sports/baseball_mlb/odds"
-    api_key = "4ba66e1c5d7028fa3011271f95009abc"
+    api_key = "22a6282c9744177b06acb842d34a02cb"
     params = {
         'apiKey': api_key,
         'regions': 'us',
@@ -714,10 +714,10 @@ def market_predict(post_id,page_id,type):
 
     # API endpoint and key
     url = "https://api.the-odds-api.com/v4/sports/baseball_mlb/odds"
-    api_key = "4ba66e1c5d7028fa3011271f95009abc"
+    api_key = "22a6282c9744177b06acb842d34a02cb"
     # API endpoint and key
     url = "https://api.the-odds-api.com/v4/sports/baseball_mlb/odds"
-    api_key = "4ba66e1c5d7028fa3011271f95009abc"
+    api_key = "22a6282c9744177b06acb842d34a02cb"
     params = {
         'apiKey': api_key,
         'regions': 'us',
