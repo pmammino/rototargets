@@ -352,7 +352,7 @@ def generate_leaderboard(days,type_id):
                                   database='crowdicate')
     if cnx and cnx.is_connected():
         with cnx.cursor() as cursor:
-            result = cursor.execute("select a.predictable,a.date,a.page,a.prediction,a.result,t.type from `crowdicate`.`predictions` as a left join `crowdicate`.`predictables` as t on a.predictable = t.id WHERE STR_TO_DATE(date, '%m/%d/%Y') BETWEEN DATE_SUB(NOW(), INTERVAL "
+            result = cursor.execute("select a.id,a.predictable,a.date,a.page,a.prediction,a.result,t.type from `crowdicate`.`predictions` as a left join `crowdicate`.`predictables` as t on a.predictable = t.id WHERE STR_TO_DATE(date, '%m/%d/%Y') BETWEEN DATE_SUB(NOW(), INTERVAL "
             + days + " DAY) AND NOW()"
                                     )
 
@@ -360,7 +360,7 @@ def generate_leaderboard(days,type_id):
 
         cnx.close()
 
-    results = pd.DataFrame(list(rows), columns=["predictable", "date", "page", "prediction", "result",'type'])
+    results = pd.DataFrame(list(rows), columns=['id',"predictable", "date", "page", "prediction", "result",'type'])
     results = results[results[['result']].notnull().all(1)]
     results = results[results.type == name]
 
