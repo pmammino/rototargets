@@ -331,15 +331,28 @@ def export_predictions(post_id):
     template = template.sort_values(["type",'player', 'amount'], ascending=[True, True,True])
     return template.to_json(orient='records')
 
-@application.route("/leaderboard/<string:days>")
-def generate_leaderboard(days):
+@application.route("/leaderboard/<string:days>/<string:type_id>")
+def generate_leaderboard(days,type_id):
+    response = requests.get("https://crowdicate.com/api/1.1/obj/types")
+    data = response.json()
+    results = pd.DataFrame(data["response"]["results"])
+    while data["response"]["remaining"] > 0:
+        cursor = data["response"]["cursor"] + 100
+        response = requests.get(
+            "https://crowdicate.com/api/1.1/obj/types" + "?cursor=" + str(
+                cursor) + "&limit=100")
+        data = response.json()
+        test = pd.DataFrame(data["response"]["results"])
+        results = pd.concat([results, test])
+    name = results[results._id == type_id]
+    name = name["type_text"].values[0]
     cnx = mysql.connector.connect(user='doadmin', password='AVNS_Lkaktbc2QgJkv-oDi60',
                                   host='db-mysql-nyc3-89566-do-user-8045222-0.c.db.ondigitalocean.com',
                                   port=25060,
                                   database='crowdicate')
     if cnx and cnx.is_connected():
         with cnx.cursor() as cursor:
-            result = cursor.execute("SELECT * FROM predictions WHERE STR_TO_DATE(date, '%m/%d/%Y') BETWEEN DATE_SUB(NOW(), INTERVAL "
+            result = cursor.execute("select a.predictable,a.date,a.page,a.prediction,a.result,t.type from `crowdicate`.`predictions` as a left join `crowdicate`.`predictables` as t on a.predictable = t.id WHERE STR_TO_DATE(date, '%m/%d/%Y') BETWEEN DATE_SUB(NOW(), INTERVAL "
             + days + " DAY) AND NOW()"
                                     )
 
@@ -347,8 +360,9 @@ def generate_leaderboard(days):
 
         cnx.close()
 
-    results = pd.DataFrame(list(rows), columns=["id", "predictable", "date", "page", "post", "prediction", "result"])
+    results = pd.DataFrame(list(rows), columns=["predictable", "date", "page", "prediction", "result",'type'])
     results = results[results[['result']].notnull().all(1)]
+    results = results[results.type == type_id]
 
     # Grouping DataFrame by 'type' and calculating Brier score for each group
     brier_scores = results.groupby('page').apply(lambda group: brier_score_loss(group['result'], group['prediction']))
