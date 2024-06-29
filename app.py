@@ -1048,8 +1048,8 @@ def predict_model_strikeout(post_id,page_id,model_id):
 
             cnx.close()
         return "success"
-        else:
-        return "Could not connect"
+    else:
+            return "Could not connect"
 
 
 # Press the green button in the gutter to run the script.
