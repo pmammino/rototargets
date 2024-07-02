@@ -17,7 +17,7 @@ import sqlite3
 import mysql.connector
 from sklearn.ensemble import RandomForestRegressor
 from pybaseball import pitching_stats, team_batting, playerid_reverse_lookup
-from scipy.stats import norm
+import scipy
 
 application = Flask(__name__)
 application.secret_key = ''.join(random.choices(string.ascii_uppercase + string.digits, k=8))
