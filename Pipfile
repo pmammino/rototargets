@@ -4,7 +4,6 @@ verify_ssl = true
 name = "pypi"
 
 [packages]
-pymongo = "4.3.3"
 beautifulsoup4 = "*"
 requests = "*"
 passlib = "*"
