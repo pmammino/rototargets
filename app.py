@@ -1064,7 +1064,7 @@ def bet_finder_strikeouts(post_id):
         'markets': 'pitcher_strikeouts_alternate',
         'oddsFormat': 'american',
         'commenceTimeFrom': datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ'),
-        'commenceTimeTo': (datetime.utcnow() + timedelta(days=1)).replace(hour=6, minute=0).strftime(
+        'commenceTimeTo': (datetime.utcnow() + timedelta(days=2)).replace(hour=6, minute=0).strftime(
             '%Y-%m-%dT%H:%M:%SZ')
     }
     response = requests.get(url, params=params)
@@ -1087,7 +1087,7 @@ def bet_finder_strikeouts(post_id):
             'markets': 'pitcher_strikeouts,pitcher_strikeouts_alternate',
             'oddsFormat': 'american',
             'commenceTimeFrom': datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ'),
-            'commenceTimeTo': (datetime.utcnow() + timedelta(days=1)).replace(hour=6, minute=0).strftime(
+            'commenceTimeTo': (datetime.utcnow() + timedelta(days=2)).replace(hour=6, minute=0).strftime(
                 '%Y-%m-%dT%H:%M:%SZ')
         }
         # x = datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ')
