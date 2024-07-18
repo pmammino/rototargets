@@ -1140,12 +1140,12 @@ def bet_finder_strikeouts(post_id):
     # Convert flattened markets data into a DataFrame
     df = pd.DataFrame(flattened_markets)
 
-    max_indices = df.groupby(["player_name", 'outcome_name', 'outcome_point'])['outcome_price'].idxmax()
-    min_indices = df.groupby(["player_name", 'outcome_name', 'outcome_point'])['outcome_price'].idxmin()
+    #max_indices = df.groupby(["player_name", 'outcome_name', 'outcome_point'])['outcome_price'].idxmax()
+    #min_indices = df.groupby(["player_name", 'outcome_name', 'outcome_point'])['outcome_price'].idxmin()
 
     # Combine the indices and filter the DataFrame
-    unique_indices = max_indices.append(min_indices).unique()
-    df = df.loc[unique_indices]
+    #unique_indices = max_indices.append(min_indices).unique()
+    #df = df.loc[unique_indices]
 
     df['Im_Prob'] = np.where(df['outcome_price'] >= 0, 100 / (100 + df['outcome_price']),
                              -df['outcome_price'] / (-df['outcome_price'] + 100))
