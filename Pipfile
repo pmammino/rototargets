@@ -23,6 +23,7 @@ scikit-learn = "*"
 mysql-connector-python = "*"
 pybaseball = "*"
 scipy = "*"
+pytz = "*"
 
 
 [dev-packages]

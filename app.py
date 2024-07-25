@@ -18,6 +18,8 @@ import mysql.connector
 from sklearn.ensemble import RandomForestRegressor
 from pybaseball import pitching_stats, team_batting, playerid_reverse_lookup
 import scipy
+from pytz import timezone
+
 
 application = Flask(__name__)
 application.secret_key = ''.join(random.choices(string.ascii_uppercase + string.digits, k=8))
@@ -149,30 +151,38 @@ def get_template(page_id):
     results = results[results._id == page_id]
     types = results["type_list_custom_types"].values[0]
     results_type = results_type[results_type['_id'].isin(types)]
+    tz = timezone('America/New_York')
+
     URL = "https://baseballsavant.mlb.com/probable-pitchers"
     page = requests.get(URL, verify=False)
     soup = BeautifulSoup(page.content, "html.parser")
+    print(type(page.content))
+    tester = soup.find_all("div", class_="mod")
     links = soup.find_all("a", class_="matchup-link")
+    now = datetime.now(tz)
+    current_time = datetime.strptime(now.strftime("%H:%M:%S"), "%H:%M:%S").time()
     link_list = []
-    for link in links:
-        test = link["href"]
-        splitting = test.split('player_id=')
-        link_list.append(splitting[1])
-    URL = "https://baseballsavant.mlb.com/probable-pitchers"
-    page = requests.get(URL, verify=False)
-    soup = BeautifulSoup(page.content, "html.parser")
-    links = soup.find_all("div", class_="game-info")
-    for link in links:
-        link_list.append(link.h2.text.strip())
-    URL = "https://baseballsavant.mlb.com/probable-pitchers"
-    page = requests.get(URL, verify=False)
-    soup = BeautifulSoup(page.content, "html.parser")
-    links = soup.find_all("div", class_="game-info")
-    for link in links:
-        test = link.h2.text.strip()
-        splitting = test.split(' @ ')
-        link_list.append(splitting[0])
-        link_list.append(splitting[1])
+    for mod in tester:
+        time_list = mod.find_all("span", class_="time")
+        for time in time_list:
+            test = time.text.strip()
+            splitting = test.split(' ET')
+            time_object = datetime.strptime(splitting[0], '%I:%M %p').time()
+            if time_object > current_time:
+                links = mod.find_all("a", class_="matchup-link")
+                for link in links:
+                    test = link["href"]
+                    splitting = test.split('player_id=')
+                    link_list.append(splitting[1])
+                links = mod.find_all("div", class_="game-info")
+                for link in links:
+                    link_list.append(link.h2.text.strip())
+                links = mod.find_all("div", class_="game-info")
+                for link in links:
+                    test = link.h2.text.strip()
+                    splitting = test.split(' @ ')
+                    link_list.append(splitting[0])
+                    link_list.append(splitting[1])
 
     cnx = mysql.connector.connect(user='doadmin', password='AVNS_Lkaktbc2QgJkv-oDi60',
                                   host='db-mysql-nyc3-89566-do-user-8045222-0.c.db.ondigitalocean.com',
