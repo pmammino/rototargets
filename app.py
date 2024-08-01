@@ -424,7 +424,7 @@ def bet_finder(post_id):
     api_key = "22a6282c9744177b06acb842d34a02cb"
     params = {
         'apiKey': api_key,
-        'regions': 'us',
+        'regions': 'us,us2',
         ##'markets': 'h2h,spreads',
         'markets': 'h2h',
         'oddsFormat': 'american',
@@ -745,7 +745,7 @@ def market_predict(post_id,page_id,type):
     api_key = "22a6282c9744177b06acb842d34a02cb"
     params = {
         'apiKey': api_key,
-        'regions': 'us',
+        'regions': 'us,us2',
         ##'markets': 'h2h,spreads',
         'markets': 'h2h',
         'oddsFormat': 'american',
@@ -1068,7 +1068,7 @@ def bet_finder_strikeouts(post_id):
     api_key = "22a6282c9744177b06acb842d34a02cb"
     params = {
         'apiKey': api_key,
-        'regions': 'us',
+        'regions': 'us,us2',
         ##'markets': 'h2h,spreads',
         ##'markets': 'pitcher_strikeouts_alternate,batter_total_bases',
         'markets': 'pitcher_strikeouts_alternate',
@@ -1092,7 +1092,7 @@ def bet_finder_strikeouts(post_id):
         api_key = "22a6282c9744177b06acb842d34a02cb"
         params = {
             'apiKey': api_key,
-            'regions': 'us',
+            'regions': 'us,us2',
             ##'markets': 'h2h,spreads',
             'markets': 'pitcher_strikeouts,pitcher_strikeouts_alternate',
             'oddsFormat': 'american',
