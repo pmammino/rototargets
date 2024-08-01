@@ -1324,8 +1324,8 @@ def test_bet():
         'Im_Prob']) * 100).round(1)
 
     grouped_data = predictions_live.groupby(['bookmaker_title', 'player', 'outcome_price', 'outcome_point']).apply(
-        lambda x: x[['page', 'diff']])
-    return grouped_data.to_json(orient='records')
+        lambda x: x[['page', 'diff']].to_json(orient='records'))
+    return grouped_data
 
 
 # Press the green button in the gutter to run the script.
