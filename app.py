@@ -1323,9 +1323,9 @@ def test_bet():
     predictions_live['diff'] = (((predictions_live['prediction'] - predictions_live['Im_Prob']) / predictions_live[
         'Im_Prob']) * 100).round(1)
 
-    grouped_data = predictions_live.groupby(['bookmaker_title', 'player', 'outcome_price', 'outcome_point']).apply(
-        lambda x: x[['page', 'diff']].to_json(orient='records'))
-    return grouped_data
+    df_grouped = predictions_live.groupby(['bookmaker_title', 'player', 'outcome_price', 'outcome_point'])[
+        ['page', 'diff']].apply(lambda x: x.to_dict(orient="records")).to_json()
+    return df_grouped
 
 
 # Press the green button in the gutter to run the script.
