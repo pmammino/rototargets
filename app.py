@@ -1204,6 +1204,129 @@ def bet_finder_strikeouts(post_id):
     predictions_live = predictions_live.sort_values(["diff"], ascending=[False])
     return predictions_live.to_json(orient='records')
 
+@application.route("/test_bet_finder")
+def test_bet():
+    # API endpoint and key
+    url = "https://api.the-odds-api.com/v4/sports/baseball_mlb/events/"
+    api_key = "22a6282c9744177b06acb842d34a02cb"
+    params = {
+        'apiKey': api_key,
+        'regions': 'us',
+        ##'markets': 'h2h,spreads',
+        ##'markets': 'pitcher_strikeouts_alternate,batter_total_bases',
+        'markets': 'pitcher_strikeouts_alternate',
+        'oddsFormat': 'american',
+        'commenceTimeFrom': datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ'),
+        'commenceTimeTo': (datetime.utcnow() + timedelta(days=1)).replace(hour=6, minute=0).strftime(
+            '%Y-%m-%dT%H:%M:%SZ')
+    }
+    response = requests.get(url, params=params)
+    data = response.json()
+
+    events = []
+
+    for event in data:
+        events.append(event['id'])
+
+    flattened_markets = []
+
+    for event in events:
+        url = "https://api.the-odds-api.com/v4/sports/baseball_mlb/events/" + event + "/odds"
+        api_key = "22a6282c9744177b06acb842d34a02cb"
+        params = {
+            'apiKey': api_key,
+            'regions': 'us',
+            ##'markets': 'h2h,spreads',
+            'markets': 'pitcher_strikeouts,pitcher_strikeouts_alternate',
+            'oddsFormat': 'american',
+            'bookmakers': 'draftkings,fanduel,fliff',
+            'commenceTimeFrom': datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ'),
+            'commenceTimeTo': (datetime.utcnow() + timedelta(days=1)).replace(hour=6, minute=0).strftime(
+                '%Y-%m-%dT%H:%M:%SZ')
+        }
+        # x = datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ')
+
+        # x = (datetime.utcnow() + timedelta(days=1)).replace(hour=6, minute=0).strftime('%Y-%m-%dT%H:%M:%SZ')
+        # Fetch the data from the API
+        response = requests.get(url, params=params)
+        data = response.json()
+
+        # Extract and flatten markets data
+
+        for entry in data:
+            game_info = {
+                "id": data["id"],
+                "sport_key": data["sport_key"],
+                "sport_title": data["sport_title"],
+                "commence_time": data["commence_time"],
+                "home_team": data["home_team"],
+                "away_team": data["away_team"]
+            }
+            for bookmaker in data["bookmakers"]:
+                bookmaker_info = {
+                    "bookmaker_key": bookmaker["key"],
+                    "bookmaker_title": bookmaker["title"]
+                }
+                for market in bookmaker["markets"]:
+                    market_info = game_info.copy()
+                    market_info.update(bookmaker_info)
+                    market_info.update({
+                        "market_key": market["key"],
+                    })
+                    for outcome in market["outcomes"]:
+                        outcome_info = market_info.copy()
+                        if "point" in outcome:
+                            outcome_info.update({
+                                "player_name": outcome["description"],
+                                "outcome_name": outcome["name"],
+                                "outcome_price": outcome["price"],
+                                "outcome_point": outcome["point"]
+                            })
+                        else:
+                            outcome_info.update({
+                                "player_name": outcome["description"],
+                                "outcome_name": outcome["name"],
+                                "outcome_price": outcome["price"],
+                                "outcome_point": 0
+                            })
+                        flattened_markets.append(outcome_info)
+
+    # Convert flattened markets data into a DataFrame
+    df = pd.DataFrame(flattened_markets)
+    max_indices = df.groupby(['outcome_name', 'outcome_point', 'player_name'])['outcome_price'].idxmax()
+    filtered_df = df.loc[max_indices]
+    filtered_df['Im_Prob'] = np.where(filtered_df['outcome_price'] >= 0, 100 / (100 + filtered_df['outcome_price']),
+                                      -filtered_df['outcome_price'] / (-filtered_df['outcome_price'] + 100))
+
+    filtered_df = filtered_df[filtered_df['outcome_name'] == 'Over']
+
+    cnx = mysql.connector.connect(user='doadmin', password='AVNS_Lkaktbc2QgJkv-oDi60',
+                                  host='db-mysql-nyc3-89566-do-user-8045222-0.c.db.ondigitalocean.com',
+                                  port=25060,
+                                  database='crowdicate')
+    if cnx and cnx.is_connected():
+        with cnx.cursor() as cursor:
+            result = cursor.execute(
+                "SELECT s.predictable,s.date,s.page,s.prediction,t.id,t.type, t.amount,t.player,t.player_id FROM crowdicate.predictions as s left join crowdicate.predictables as t on s.predictable = t.id WHERE STR_TO_DATE(s.date, '%m/%d/%Y') = CURDATE()"
+                )
+
+            rows = cursor.fetchall()
+
+        cnx.close()
+
+    results = pd.DataFrame(list(rows),
+                           columns=["predictable", "date", "page", "prediction", 'id', 'type', 'amount', 'player',
+                                    'player_id'])
+
+    predictions_live = filtered_df.merge(results[["player", "amount", "prediction", "page"]], how='left',
+                                         left_on=['player_name', 'outcome_point'], right_on=['player', "amount"])
+    predictions_live['diff'] = (((predictions_live['prediction'] - predictions_live['Im_Prob']) / predictions_live[
+        'Im_Prob']) * 100).round(1)
+
+    grouped_data = predictions_live.groupby(['bookmaker_title', 'player', 'outcome_price', 'outcome_point']).apply(
+        lambda x: x[['page', 'diff']])
+    return grouped_data.to_json(orient='records')
+
 
 # Press the green button in the gutter to run the script.
 if __name__ == '__main__':
