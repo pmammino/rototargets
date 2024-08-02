@@ -1204,7 +1204,7 @@ def bet_finder_strikeouts(post_id):
     predictions_live = predictions_live.sort_values(["diff"], ascending=[False])
     return predictions_live.to_json(orient='records')
 
-@application.route("/test_bet_finder/<string:market>")
+@application.route("/test_bet_finder/<string:market>/")
 @application.route("/test_bet_finder/<string:market>/<string:books>")
 def test_bet(market,books = None):
     if market == "strikeouts":
@@ -1472,12 +1472,13 @@ def test_bet(market,books = None):
         results = pd.DataFrame(list(rows),
                                columns=["predictable", "date", "page", "prediction", 'id', 'type', 'amount', 'player',
                                         'player_id'])
-        predictions_live["outcome_point"] = ""
 
         predictions_live = filtered_df.merge(results[["player", "amount", "prediction", "page"]], how='left',
                                              left_on=['outcome_name'], right_on=['player'])
         predictions_live['diff'] = (((predictions_live['prediction'] - predictions_live['Im_Prob']) / predictions_live[
             'Im_Prob']) * 100).round(1)
+
+        predictions_live["outcome_point"] = ""
 
         predictions_live = predictions_live.dropna(subset=['prediction', 'page', 'diff'])
 
