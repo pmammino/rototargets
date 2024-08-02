@@ -1307,7 +1307,7 @@ def test_bet():
     if cnx and cnx.is_connected():
         with cnx.cursor() as cursor:
             result = cursor.execute(
-                "SELECT s.predictable,s.date,s.page,s.prediction,t.id,t.type, t.amount,t.player,t.player_id FROM crowdicate.predictions as s left join crowdicate.predictables as t on s.predictable = t.id WHERE STR_TO_DATE(s.date, '%m/%d/%Y') = CURDATE()"
+                "SELECT s.predictable,s.date,s.page,s.prediction,t.id,t.type, t.amount,t.player,t.player_id FROM crowdicate.predictions as s left join crowdicate.predictables as t on s.predictable = t.id WHERE STR_TO_DATE(s.date, '%m/%d/%Y') = CURDATE() - INTERVAL 1 DAY"
                 )
 
             rows = cursor.fetchall()
