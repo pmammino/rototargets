@@ -1249,17 +1249,31 @@ def test_bet(market,books = None):
         for event in events:
             url = "https://api.the-odds-api.com/v4/sports/baseball_mlb/events/" + event + "/odds"
             api_key = "22a6282c9744177b06acb842d34a02cb"
-            params = {
-                'apiKey': api_key,
-                'regions': 'us',
-                ##'markets': 'h2h,spreads',
-                'markets': 'pitcher_strikeouts,pitcher_strikeouts_alternate',
-                'oddsFormat': 'american',
-                'bookmakers': 'draftkings,fanduel,fliff',
-                'commenceTimeFrom': datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ'),
-                'commenceTimeTo': (datetime.utcnow() + timedelta(days=1)).replace(hour=6, minute=0).strftime(
-                    '%Y-%m-%dT%H:%M:%SZ')
-            }
+            if books is not None:
+                params = {
+                    'apiKey': api_key,
+                    'regions': 'us',
+                    ##'markets': 'h2h,spreads',
+                    ##'markets': 'pitcher_strikeouts_alternate,batter_total_bases',
+                    'bookmakers': books,
+                    'markets': 'pitcher_strikeouts_alternate',
+                    'oddsFormat': 'american',
+                    'commenceTimeFrom': datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ'),
+                    'commenceTimeTo': (datetime.utcnow() + timedelta(days=1)).replace(hour=6, minute=0).strftime(
+                        '%Y-%m-%dT%H:%M:%SZ')
+                }
+            else:
+                params = {
+                    'apiKey': api_key,
+                    'regions': 'us',
+                    ##'markets': 'h2h,spreads',
+                    ##'markets': 'pitcher_strikeouts_alternate,batter_total_bases',
+                    'markets': 'pitcher_strikeouts_alternate',
+                    'oddsFormat': 'american',
+                    'commenceTimeFrom': datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ'),
+                    'commenceTimeTo': (datetime.utcnow() + timedelta(days=1)).replace(hour=6, minute=0).strftime(
+                        '%Y-%m-%dT%H:%M:%SZ')
+                }
             # x = datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ')
 
             # x = (datetime.utcnow() + timedelta(days=1)).replace(hour=6, minute=0).strftime('%Y-%m-%dT%H:%M:%SZ')
