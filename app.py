@@ -1307,7 +1307,7 @@ def test_bet():
     if cnx and cnx.is_connected():
         with cnx.cursor() as cursor:
             result = cursor.execute(
-                "SELECT s.predictable,s.date,s.page,s.prediction,t.id,t.type, t.amount,t.player,t.player_id FROM crowdicate.predictions as s left join crowdicate.predictables as t on s.predictable = t.id WHERE STR_TO_DATE(s.date, '%m/%d/%Y') = CURDATE() - INTERVAL 1 DAY"
+                "SELECT s.predictable,s.date,s.page,s.prediction,t.id,t.type, t.amount,t.player,t.player_id FROM crowdicate.predictions as s left join crowdicate.predictables as t on s.predictable = t.id WHERE STR_TO_DATE(s.date, '%m/%d/%Y') = CURDATE()"
                 )
 
             rows = cursor.fetchall()
@@ -1323,13 +1323,37 @@ def test_bet():
     predictions_live['diff'] = (((predictions_live['prediction'] - predictions_live['Im_Prob']) / predictions_live[
         'Im_Prob']) * 100).round(1)
 
-    df_out = predictions_live.pivot_table(columns='page',
-                                          index=['bookmaker_title', 'player', 'outcome_price', 'outcome_point'],
-                                          values='diff', aggfunc=list)
+    predictions_live = predictions_live.dropna(subset=['prediction', 'page', 'diff'])
 
-    df_out.columns = df_out.columns
+    # Group the data
+    grouped = predictions_live.groupby(['player_name', 'bookmaker_title', 'outcome_price', 'outcome_point'])
 
-    return df_out.reset_index().to_json(orient='records')
+    # Initialize the list to hold the final JSON structure
+    bets = []
+
+    # Iterate through the groups and construct the JSON structure
+    for (player_name, bookmaker_title, outcome_price, outcome_point), group in grouped:
+        predictions = []
+        for _, row in group.iterrows():
+            predictions.append({
+                "page": row['page'],
+                "diff": str(row['diff'])
+            })
+        bet = {
+            "player_name": player_name,
+            "bookmaker_title": bookmaker_title,
+            "outcome_price": str(outcome_price),
+            "outcome_point": str(outcome_point),
+            "predictions": predictions
+        }
+        bets.append(bet)
+
+    # Create the final JSON structure
+    final_json = {
+        "bets": bets
+    }
+
+    return json.dumps(final_json, indent=2)
 
 
 # Press the green button in the gutter to run the script.
