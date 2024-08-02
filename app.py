@@ -1453,8 +1453,8 @@ def test_bet(market,books = None):
         # unique_indices = max_indices.append(min_indices).unique()
         filtered_df = df.loc[max_indices]
 
-        df['Im_Prob'] = np.where(df['outcome_price'] >= 0, 100 / (100 + df['outcome_price']),
-                                 -df['outcome_price'] / (-df['outcome_price'] + 100))
+        filtered_df['Im_Prob'] = np.where(filtered_df['outcome_price'] >= 0, 100 / (100 + filtered_df['outcome_price']),
+                                 -filtered_df['outcome_price'] / (-filtered_df['outcome_price'] + 100))
         cnx = mysql.connector.connect(user='doadmin', password='AVNS_Lkaktbc2QgJkv-oDi60',
                                       host='db-mysql-nyc3-89566-do-user-8045222-0.c.db.ondigitalocean.com',
                                       port=25060,
