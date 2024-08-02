@@ -1208,7 +1208,7 @@ def bet_finder_strikeouts(post_id):
 def test_bet():
     # API endpoint and key
     url = "https://api.the-odds-api.com/v4/sports/baseball_mlb/events/"
-    api_key = "22a6282c9744177b06acb842d34a02cb"
+    api_key = "4ba66e1c5d7028fa3011271f95009abc"
     params = {
         'apiKey': api_key,
         'regions': 'us',
@@ -1232,7 +1232,7 @@ def test_bet():
 
     for event in events:
         url = "https://api.the-odds-api.com/v4/sports/baseball_mlb/events/" + event + "/odds"
-        api_key = "22a6282c9744177b06acb842d34a02cb"
+        api_key = "4ba66e1c5d7028fa3011271f95009abc"
         params = {
             'apiKey': api_key,
             'regions': 'us',
