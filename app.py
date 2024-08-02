@@ -1207,7 +1207,7 @@ def bet_finder_strikeouts(post_id):
 @application.route("/test_bet_finder/<string:market>")
 @application.route("/test_bet_finder/<string:market>/<string:books>")
 def test_bet(market,books = None):
-    if market == "MLB - Strikeouts":
+    if market == "strikeouts":
         # API endpoint and key
         url = "https://api.the-odds-api.com/v4/sports/baseball_mlb/events/"
         api_key = "22a6282c9744177b06acb842d34a02cb"
