@@ -1329,8 +1329,7 @@ def test_bet():
 
     df_out.columns = df_out.columns
 
-    df_out.reset_index().to_json(orient='records'))
-    return df_out.reset_index().to_json(orient='records'))
+    return df_out.reset_index().to_json(orient='records')
 
 
 # Press the green button in the gutter to run the script.
