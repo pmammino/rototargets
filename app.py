@@ -1259,7 +1259,7 @@ def test_bet(market,books = None):
                     'markets': 'pitcher_strikeouts_alternate',
                     'oddsFormat': 'american',
                     'commenceTimeFrom': datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ'),
-                    'commenceTimeTo': (datetime.utcnow() + timedelta(days=1)).replace(hour=6, minute=0).strftime(
+                    'commenceTimeTo': (datetime.utcnow() + timedelta(days=1)).replace(hour=0, minute=0).strftime(
                         '%Y-%m-%dT%H:%M:%SZ')
                 }
             else:
@@ -1271,7 +1271,7 @@ def test_bet(market,books = None):
                     'markets': 'pitcher_strikeouts_alternate',
                     'oddsFormat': 'american',
                     'commenceTimeFrom': datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ'),
-                    'commenceTimeTo': (datetime.utcnow() + timedelta(days=1)).replace(hour=6, minute=0).strftime(
+                    'commenceTimeTo': (datetime.utcnow() + timedelta(days=1)).replace(hour=0, minute=0).strftime(
                         '%Y-%m-%dT%H:%M:%SZ')
                 }
             # x = datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ')
@@ -1400,7 +1400,7 @@ def test_bet(market,books = None):
                 'markets': 'h2h',
                 'oddsFormat': 'american',
                 'commenceTimeFrom': datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ'),
-                'commenceTimeTo': (datetime.utcnow() + timedelta(days=1)).replace(hour=6, minute=0).strftime(
+                'commenceTimeTo': (datetime.utcnow() + timedelta(days=1)).replace(hour=0, minute=0).strftime(
                     '%Y-%m-%dT%H:%M:%SZ')
             }
         else:
@@ -1411,7 +1411,7 @@ def test_bet(market,books = None):
                 'markets': 'h2h',
                 'oddsFormat': 'american',
                 'commenceTimeFrom': datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ'),
-                'commenceTimeTo': (datetime.utcnow() + timedelta(days=1)).replace(hour=6, minute=0).strftime(
+                'commenceTimeTo': (datetime.utcnow() + timedelta(days=1)).replace(hour=0, minute=0).strftime(
                     '%Y-%m-%dT%H:%M:%SZ')
             }
 
