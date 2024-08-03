@@ -1351,8 +1351,10 @@ def test_bet(market,books = None):
 
         predictions_live = filtered_df.merge(results[["player", "amount", "prediction", "page"]], how='left',
                                              left_on=['player_name', 'outcome_point'], right_on=['player', "amount"])
-        predictions_live['diff'] = (((predictions_live['prediction'] - predictions_live['Im_Prob']) / predictions_live[
-            'Im_Prob']) * 100).round(1)
+        #predictions_live['diff'] = (((predictions_live['prediction'] - predictions_live['Im_Prob']) / predictions_live[
+        #    'Im_Prob']) * 100).round(1)
+
+        predictions_live['diff'] = ((((1/predictions_live['Im_Prob'])-1) * predictions_live['prediction'])+((1-(predictions_live['prediction']))*-1)).round(2)
 
         predictions_live = predictions_live.dropna(subset=['prediction', 'page', 'diff'])
 
@@ -1491,8 +1493,11 @@ def test_bet(market,books = None):
 
         predictions_live = filtered_df.merge(results[["player", "amount", "prediction", "page"]], how='left',
                                              left_on=['outcome_name'], right_on=['player'])
-        predictions_live['diff'] = (((predictions_live['prediction'] - predictions_live['Im_Prob']) / predictions_live[
-            'Im_Prob']) * 100).round(1)
+        # predictions_live['diff'] = (((predictions_live['prediction'] - predictions_live['Im_Prob']) / predictions_live[
+        #    'Im_Prob']) * 100).round(1)
+
+        predictions_live['diff'] = ((((1/predictions_live['Im_Prob'])-1) * predictions_live['prediction'])+((1-(predictions_live['prediction']))*-1)).round(2)
+
 
         predictions_live["outcome_point"] = ""
 
