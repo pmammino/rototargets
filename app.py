@@ -1336,8 +1336,9 @@ def test_bet(market,books = None):
                                       database='crowdicate')
         if cnx and cnx.is_connected():
             with cnx.cursor() as cursor:
+                cursor.execute("SET time_zone = 'EST';")
                 result = cursor.execute(
-                    "SET time_zone = 'EST'; SELECT s.predictable,s.date,s.page,s.prediction,t.id,t.type, t.amount,t.player,t.player_id FROM crowdicate.predictions as s left join crowdicate.predictables as t on s.predictable = t.id WHERE STR_TO_DATE(s.date, '%m/%d/%Y') = CURDATE()"
+                    "SELECT s.predictable,s.date,s.page,s.prediction,t.id,t.type, t.amount,t.player,t.player_id FROM crowdicate.predictions as s left join crowdicate.predictables as t on s.predictable = t.id WHERE STR_TO_DATE(s.date, '%m/%d/%Y') = CURDATE()"
                 )
 
                 rows = cursor.fetchall()
@@ -1475,8 +1476,9 @@ def test_bet(market,books = None):
                                       database='crowdicate')
         if cnx and cnx.is_connected():
             with cnx.cursor() as cursor:
+                cursor.execute("SET time_zone = 'EST';")
                 result = cursor.execute(
-                    "SET time_zone = 'EST'; SELECT s.predictable,s.date,s.page,s.prediction,t.id,t.type, t.amount,t.player,t.player_id FROM crowdicate.predictions as s left join crowdicate.predictables as t on s.predictable = t.id WHERE STR_TO_DATE(s.date, '%m/%d/%Y') = CURDATE()"
+                    "SELECT s.predictable,s.date,s.page,s.prediction,t.id,t.type, t.amount,t.player,t.player_id FROM crowdicate.predictions as s left join crowdicate.predictables as t on s.predictable = t.id WHERE STR_TO_DATE(s.date, '%m/%d/%Y') = CURDATE()"
                 )
 
                 rows = cursor.fetchall()
