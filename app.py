@@ -1071,7 +1071,7 @@ def bet_finder_strikeouts(post_id):
         'regions': 'us,us2',
         ##'markets': 'h2h,spreads',
         ##'markets': 'pitcher_strikeouts_alternate,batter_total_bases',
-        'markets': 'pitcher_strikeouts_alternate',
+        'markets': 'pitcher_strikeouts,pitcher_strikeouts_alternate',
         'oddsFormat': 'american',
         'commenceTimeFrom': datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ'),
         'commenceTimeTo': (datetime.utcnow() + timedelta(days=2)).replace(hour=6, minute=0).strftime(
@@ -1218,7 +1218,7 @@ def test_bet(market,books = None):
                 ##'markets': 'h2h,spreads',
                 ##'markets': 'pitcher_strikeouts_alternate,batter_total_bases',
                 'bookmakers': books.replace("-",","),
-                'markets': 'pitcher_strikeouts_alternate',
+                'markets': 'pitcher_strikeouts,pitcher_strikeouts_alternate',
                 'oddsFormat': 'american',
                 'commenceTimeFrom': datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ'),
                 'commenceTimeTo': (datetime.utcnow() + timedelta(days=1)).replace(hour=6, minute=0).strftime(
@@ -1230,7 +1230,7 @@ def test_bet(market,books = None):
                 'regions': 'us',
                 ##'markets': 'h2h,spreads',
                 ##'markets': 'pitcher_strikeouts_alternate,batter_total_bases',
-                'markets': 'pitcher_strikeouts_alternate',
+                'markets': 'pitcher_strikeouts,pitcher_strikeouts_alternate',
                 'oddsFormat': 'american',
                 'commenceTimeFrom': datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ'),
                 'commenceTimeTo': (datetime.utcnow() + timedelta(days=1)).replace(hour=6, minute=0).strftime(
@@ -1256,7 +1256,7 @@ def test_bet(market,books = None):
                     ##'markets': 'h2h,spreads',
                     ##'markets': 'pitcher_strikeouts_alternate,batter_total_bases',
                     'bookmakers': books.replace("-", ","),
-                    'markets': 'pitcher_strikeouts_alternate',
+                    'markets': 'pitcher_strikeouts,pitcher_strikeouts_alternate',
                     'oddsFormat': 'american',
                     'commenceTimeFrom': datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ'),
                     'commenceTimeTo': (datetime.utcnow() + timedelta(days=1)).replace(hour=0, minute=0).strftime(
@@ -1268,7 +1268,7 @@ def test_bet(market,books = None):
                     'regions': 'us',
                     ##'markets': 'h2h,spreads',
                     ##'markets': 'pitcher_strikeouts_alternate,batter_total_bases',
-                    'markets': 'pitcher_strikeouts_alternate',
+                    'markets': 'pitcher_strikeouts,pitcher_strikeouts_alternate',
                     'oddsFormat': 'american',
                     'commenceTimeFrom': datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ'),
                     'commenceTimeTo': (datetime.utcnow() + timedelta(days=1)).replace(hour=0, minute=0).strftime(
