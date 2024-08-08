@@ -1535,6 +1535,194 @@ def test_bet(market,books = None):
 
         return json.dumps(final_json, indent=2)
 
+@application.route("/strikeout_market/<string:post_id>/<string:page_id>/<string:type>")
+def strikeout_market(post_id,page_id,type):
+    response = requests.get("https://crowdicate.com/api/1.1/obj/types")
+    data = response.json()
+    results = pd.DataFrame(data["response"]["results"])
+    while data["response"]["remaining"] > 0:
+        cursor = data["response"]["cursor"] + 100
+        response = requests.get(
+            "https://crowdicate.com/api/1.1/obj/types" + "?cursor=" + str(
+                cursor) + "&limit=100")
+        data = response.json()
+        test = pd.DataFrame(data["response"]["results"])
+        results = pd.concat([results, test])
+    name = results[results._id == type]
+    name = name["type_text"].values[0]
+
+    URL = "https://baseballsavant.mlb.com/probable-pitchers"
+    page = requests.get(URL, verify=False)
+    soup = BeautifulSoup(page.content, "html.parser")
+    links = soup.find_all("a", class_="matchup-link")
+    link_list = []
+    for link in links:
+        test = link["href"]
+        splitting = test.split('player_id=')
+        link_list.append(splitting[1])
+    URL = "https://baseballsavant.mlb.com/probable-pitchers"
+    page = requests.get(URL, verify=False)
+    soup = BeautifulSoup(page.content, "html.parser")
+    links = soup.find_all("div", class_="game-info")
+    for link in links:
+        link_list.append(link.h2.text.strip())
+    URL = "https://baseballsavant.mlb.com/probable-pitchers"
+    page = requests.get(URL, verify=False)
+    soup = BeautifulSoup(page.content, "html.parser")
+    links = soup.find_all("div", class_="game-info")
+    for link in links:
+        test = link.h2.text.strip()
+        splitting = test.split(' @ ')
+        link_list.append(splitting[0])
+        link_list.append(splitting[1])
+
+    # API endpoint and key
+    url = "https://api.the-odds-api.com/v4/sports/baseball_mlb/events/"
+    api_key = "22a6282c9744177b06acb842d34a02cb"
+    params = {
+        'apiKey': api_key,
+        'regions': 'us',
+        ##'markets': 'h2h,spreads',
+        ##'markets': 'pitcher_strikeouts_alternate,batter_total_bases',
+        'markets': 'pitcher_strikeouts_alternate',
+        'oddsFormat': 'american',
+        'commenceTimeFrom': datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ'),
+        'commenceTimeTo': (datetime.utcnow() + timedelta(days=1)).replace(hour=6, minute=0).strftime(
+            '%Y-%m-%dT%H:%M:%SZ')
+    }
+    response = requests.get(url, params=params)
+    data = response.json()
+
+    events = []
+
+    for event in data:
+        events.append(event['id'])
+
+    flattened_markets = []
+
+    for event in events:
+        url = "https://api.the-odds-api.com/v4/sports/baseball_mlb/events/" + event + "/odds"
+        api_key = "22a6282c9744177b06acb842d34a02cb"
+        params = {
+            'apiKey': api_key,
+            'regions': 'us',
+            ##'markets': 'h2h,spreads',
+            'markets': 'pitcher_strikeouts,pitcher_strikeouts_alternate',
+            'oddsFormat': 'american',
+            'commenceTimeFrom': datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ'),
+            'commenceTimeTo': (datetime.utcnow() + timedelta(days=1)).replace(hour=6, minute=0).strftime(
+                '%Y-%m-%dT%H:%M:%SZ')
+        }
+        # x = datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ')
+
+        # x = (datetime.utcnow() + timedelta(days=1)).replace(hour=6, minute=0).strftime('%Y-%m-%dT%H:%M:%SZ')
+        # Fetch the data from the API
+        response = requests.get(url, params=params)
+        data = response.json()
+
+        # Extract and flatten markets data
+
+        for entry in data:
+            game_info = {
+                "id": data["id"],
+                "sport_key": data["sport_key"],
+                "sport_title": data["sport_title"],
+                "commence_time": data["commence_time"],
+                "home_team": data["home_team"],
+                "away_team": data["away_team"]
+            }
+            for bookmaker in data["bookmakers"]:
+                bookmaker_info = {
+                    "bookmaker_key": bookmaker["key"],
+                    "bookmaker_title": bookmaker["title"]
+                }
+                for market in bookmaker["markets"]:
+                    market_info = game_info.copy()
+                    market_info.update(bookmaker_info)
+                    market_info.update({
+                        "market_key": market["key"],
+                    })
+                    for outcome in market["outcomes"]:
+                        outcome_info = market_info.copy()
+                        if "point" in outcome:
+                            outcome_info.update({
+                                "player_name": outcome["description"],
+                                "outcome_name": outcome["name"],
+                                "outcome_price": outcome["price"],
+                                "outcome_point": outcome["point"]
+                            })
+                        else:
+                            outcome_info.update({
+                                "player_name": outcome["description"],
+                                "outcome_name": outcome["name"],
+                                "outcome_price": outcome["price"],
+                                "outcome_point": 0
+                            })
+                        flattened_markets.append(outcome_info)
+
+    # Convert flattened markets data into a DataFrame
+    df = pd.DataFrame(flattened_markets)
+
+    # max_indices = df.groupby(['outcome_name','outcome_point'])['outcome_price'].idxmax()
+    # min_indices = df.groupby(['outcome_name','outcome_point'])['outcome_price'].idxmin()
+
+    # Combine the indices and filter the DataFrame
+    # unique_indices = max_indices.append(min_indices).unique()
+    # filtered_df = df.loc[unique_indices]
+
+    df['Im_Prob'] = np.where(df['outcome_price'] >= 0, 100 / (100 + df['outcome_price']),
+                             -df['outcome_price'] / (-df['outcome_price'] + 100))
+
+    df = df[df['outcome_name'] == 'Over']
+
+    group = df.groupby(['player_name', 'outcome_point'])['Im_Prob'].agg({'mean'}).reset_index()
+
+    cnx = mysql.connector.connect(user='doadmin', password='AVNS_Lkaktbc2QgJkv-oDi60',
+                                  host='db-mysql-nyc3-89566-do-user-8045222-0.c.db.ondigitalocean.com',
+                                  port=25060,
+                                  database='crowdicate')
+    if cnx and cnx.is_connected():
+        with cnx.cursor() as cursor:
+            result = cursor.execute("SELECT * FROM predictables")
+
+            rows = cursor.fetchall()
+
+            result_b = cursor.execute("SELECT * FROM predictables")
+
+            types = cursor.fetchall()
+
+            results = pd.DataFrame(list(rows), columns=["id", "amount", "player", "player_id", "type"])
+            results['date'] = str(datetime.today().strftime("%m/%d/%Y"))
+            results['prediction'] = ""
+            type_list = [name]
+
+            results = results[results['type'].isin(type_list)]
+            template = results[results['player_id'].isin(link_list) | results['player'].isin(link_list)]
+            template = template[
+                ["id", "amount", "player_id", "player", "type", "date", "prediction"]]
+            template = template.sort_values(["type", 'player', 'amount'], ascending=[True, True, True])
+
+
+            template = template.merge(group, how='left', left_on=['player',"amount"], right_on=['outcome_name',"outcome_point"])
+            template["post"] = post_id
+            template["page"] = page_id
+            template['prediction'] = template['mean']
+            template['predictable'] = template["id"]
+            template["id"] = [uuid.uuid4().hex for _ in range(len(template.index))]
+
+            template = template[["id", "predictable", "date", "page", "post", "prediction"]]
+
+            cursor.executemany("""INSERT INTO predictions
+                                                  (id,predictable,date,page,post,prediction) 
+                                                  VALUES (%s,%s,%s,%s,%s,%s);""",
+                               list(template.itertuples(index=False, name=None)))
+            cnx.commit()
+
+        cnx.close()
+        return "success"
+    else:
+        return "Could not connect"
+
 
 # Press the green button in the gutter to run the script.
 if __name__ == '__main__':
