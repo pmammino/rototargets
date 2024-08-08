@@ -1707,6 +1707,7 @@ def strikeout_market(post_id,page_id,type):
             template["post"] = post_id
             template["page"] = page_id
             template['prediction'] = template['mean']
+            template = template[template[['prediction']].notnull().all(1)]
             template['predictable'] = template["id"]
             template["id"] = [uuid.uuid4().hex for _ in range(len(template.index))]
 
