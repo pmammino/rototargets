@@ -1703,7 +1703,7 @@ def strikeout_market(post_id,page_id,type):
             template = template.sort_values(["type", 'player', 'amount'], ascending=[True, True, True])
 
 
-            template = template.merge(group, how='left', left_on=['player',"amount"], right_on=['outcome_name',"outcome_point"])
+            template = template.merge(group, how='left', left_on=['player',"amount"], right_on=['player_name',"outcome_point"])
             template["post"] = post_id
             template["page"] = page_id
             template['prediction'] = template['mean']
