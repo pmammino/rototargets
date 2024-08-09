@@ -843,6 +843,7 @@ def market_predict(post_id,page_id,type):
             template['prediction'] = template['mean']
             template['predictable'] = template["id"]
             template["id"] = [uuid.uuid4().hex for _ in range(len(template.index))]
+            template = template[template[['prediction']].notnull().all(1)]
 
             template = template[["id", "predictable", "date", "page", "post", "prediction"]]
 
