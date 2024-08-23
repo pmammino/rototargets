@@ -1205,15 +1205,16 @@ def bet_finder_strikeouts(post_id):
     predictions_live = predictions_live.sort_values(["diff"], ascending=[False])
     return predictions_live.to_json(orient='records')
 
-@application.route("/test_bet_finder/<string:market>/")
-@application.route("/test_bet_finder/<string:market>/<string:books>")
-def test_bet(market,books = None):
+@application.route("/test_bet_finder/<string:market>/<string:alt>")
+@application.route("/test_bet_finder/<string:market>//<string:alt>/<string:books>")
+def test_bet(market,alt,books = None):
     if market == "strikeouts":
         # API endpoint and key
         url = "https://api.the-odds-api.com/v4/sports/baseball_mlb/events/"
         api_key = "22a6282c9744177b06acb842d34a02cb"
         if books is not None:
-            params = {
+            if alt == 'y':
+                params = {
                 'apiKey': api_key,
                 'regions': 'us',
                 ##'markets': 'h2h,spreads',
@@ -1224,9 +1225,23 @@ def test_bet(market,books = None):
                 'commenceTimeFrom': datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ'),
                 'commenceTimeTo': (datetime.utcnow() + timedelta(days=1)).replace(hour=6, minute=0).strftime(
                     '%Y-%m-%dT%H:%M:%SZ')
-            }
+                }
+            else:
+                params = {
+                'apiKey': api_key,
+                'regions': 'us',
+                ##'markets': 'h2h,spreads',
+                ##'markets': 'pitcher_strikeouts_alternate,batter_total_bases',
+                'bookmakers': books.replace("-",","),
+                'markets': 'pitcher_strikeouts',
+                'oddsFormat': 'american',
+                'commenceTimeFrom': datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ'),
+                'commenceTimeTo': (datetime.utcnow() + timedelta(days=1)).replace(hour=6, minute=0).strftime(
+                    '%Y-%m-%dT%H:%M:%SZ')
+                }
         else:
-            params = {
+            if alt == 'y':
+                params = {
                 'apiKey': api_key,
                 'regions': 'us',
                 ##'markets': 'h2h,spreads',
@@ -1236,7 +1251,19 @@ def test_bet(market,books = None):
                 'commenceTimeFrom': datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ'),
                 'commenceTimeTo': (datetime.utcnow() + timedelta(days=1)).replace(hour=6, minute=0).strftime(
                     '%Y-%m-%dT%H:%M:%SZ')
-            }
+                }
+            else:
+                params = {
+                'apiKey': api_key,
+                'regions': 'us',
+                ##'markets': 'h2h,spreads',
+                ##'markets': 'pitcher_strikeouts_alternate,batter_total_bases',
+                'markets': 'pitcher_strikeouts',
+                'oddsFormat': 'american',
+                'commenceTimeFrom': datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ'),
+                'commenceTimeTo': (datetime.utcnow() + timedelta(days=1)).replace(hour=6, minute=0).strftime(
+                    '%Y-%m-%dT%H:%M:%SZ')
+                }
         response = requests.get(url, params=params)
         data = response.json()
 
