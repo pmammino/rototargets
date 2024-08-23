@@ -192,7 +192,7 @@ def get_template(page_id):
     games = games + schedule["home_team"].tolist()
     games = games + schedule["away_team"].tolist()
     link_list = link_list + games
-    
+
     cnx = mysql.connector.connect(user='doadmin', password='AVNS_Lkaktbc2QgJkv-oDi60',
                                   host='db-mysql-nyc3-89566-do-user-8045222-0.c.db.ondigitalocean.com',
                                   port=25060,
@@ -210,7 +210,9 @@ def get_template(page_id):
     else:
         return ("Could not connect")
     results = pd.DataFrame(list(rows), columns=["id", "amount", "player", "player_id", "type"])
-    results['date'] = str(datetime.today().strftime("%m/%d/%Y"))
+    results['date'] = np.where(results["type"].str.contains('NFL'),
+                            "Week" + str(current_week),
+                            str(datetime.today().strftime("%m/%d/%Y")))
     results['prediction'] = ""
     type_list = results_type['type_text'].tolist()
 
