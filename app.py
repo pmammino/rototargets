@@ -184,6 +184,15 @@ def get_template(page_id):
                     link_list.append(splitting[0])
                     link_list.append(splitting[1])
 
+    current_week = 1
+    schedule = pd.read_csv("schedule.csv")
+    schedule["game"] = schedule["home_team"] + " @ " + schedule["away_team"]
+    schedule = schedule[schedule['week'] == current_week]
+    games = schedule["game"].tolist()
+    games = games + schedule["home_team"].tolist()
+    games = games + schedule["away_team"].tolist()
+    link_list = link_list + games
+    
     cnx = mysql.connector.connect(user='doadmin', password='AVNS_Lkaktbc2QgJkv-oDi60',
                                   host='db-mysql-nyc3-89566-do-user-8045222-0.c.db.ondigitalocean.com',
                                   port=25060,
