@@ -1206,7 +1206,7 @@ def bet_finder_strikeouts(post_id):
     return predictions_live.to_json(orient='records')
 
 @application.route("/test_bet_finder/<string:market>/<string:alt>")
-@application.route("/test_bet_finder/<string:market>//<string:alt>/<string:books>")
+@application.route("/test_bet_finder/<string:market>/<string:alt>/<string:books>")
 def test_bet(market,alt,books = None):
     if market == "strikeouts":
         # API endpoint and key
