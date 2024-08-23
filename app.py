@@ -1278,7 +1278,8 @@ def test_bet(market,alt,books = None):
             url = "https://api.the-odds-api.com/v4/sports/baseball_mlb/events/" + event + "/odds"
             api_key = "22a6282c9744177b06acb842d34a02cb"
             if books is not None:
-                params = {
+                if alt == 'y':
+                    params = {
                     'apiKey': api_key,
                     'regions': 'us',
                     ##'markets': 'h2h,spreads',
@@ -1289,9 +1290,23 @@ def test_bet(market,alt,books = None):
                     'commenceTimeFrom': datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ'),
                     'commenceTimeTo': (datetime.utcnow() + timedelta(days=1)).replace(hour=0, minute=0).strftime(
                         '%Y-%m-%dT%H:%M:%SZ')
-                }
+                    }
+                else:
+                    params = {
+                    'apiKey': api_key,
+                    'regions': 'us',
+                    ##'markets': 'h2h,spreads',
+                    ##'markets': 'pitcher_strikeouts_alternate,batter_total_bases',
+                    'bookmakers': books.replace("-", ","),
+                    'markets': 'pitcher_strikeouts',
+                    'oddsFormat': 'american',
+                    'commenceTimeFrom': datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ'),
+                    'commenceTimeTo': (datetime.utcnow() + timedelta(days=1)).replace(hour=0, minute=0).strftime(
+                        '%Y-%m-%dT%H:%M:%SZ')
+                    }
             else:
-                params = {
+                if alt == 'y':
+                    params = {
                     'apiKey': api_key,
                     'regions': 'us',
                     ##'markets': 'h2h,spreads',
@@ -1301,7 +1316,19 @@ def test_bet(market,alt,books = None):
                     'commenceTimeFrom': datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ'),
                     'commenceTimeTo': (datetime.utcnow() + timedelta(days=1)).replace(hour=0, minute=0).strftime(
                         '%Y-%m-%dT%H:%M:%SZ')
-                }
+                    }
+                else:
+                    params = {
+                    'apiKey': api_key,
+                    'regions': 'us',
+                    ##'markets': 'h2h,spreads',
+                    ##'markets': 'pitcher_strikeouts_alternate,batter_total_bases',
+                    'markets': 'pitcher_strikeouts',
+                    'oddsFormat': 'american',
+                    'commenceTimeFrom': datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ'),
+                    'commenceTimeTo': (datetime.utcnow() + timedelta(days=1)).replace(hour=0, minute=0).strftime(
+                        '%Y-%m-%dT%H:%M:%SZ')
+                    }
             # x = datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ')
 
             # x = (datetime.utcnow() + timedelta(days=1)).replace(hour=6, minute=0).strftime('%Y-%m-%dT%H:%M:%SZ')
