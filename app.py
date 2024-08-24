@@ -1828,7 +1828,7 @@ def predict_single(page_id,post_id,predictable_id,prediction):
                                        str(datetime.today().strftime("%m/%d/%Y")))
 
             results['prediction'] = ""
-            template = results["id" = predictable_id]
+            template = results[results.id == predictable_id]
             template = template[
                 ["id", "amount", "player_id", "player", "type", "date", "prediction"]]
             template = template.sort_values(["type", 'player', 'amount'], ascending=[True, True, True])
