@@ -1791,6 +1791,25 @@ def strikeout_market(post_id,page_id,type):
         return "Could not connect"
 
 
+@application.route("/delete_predictions/<string:post_id>")
+def delete_predictions(post_id):
+    cnx = mysql.connector.connect(user='doadmin', password='AVNS_Lkaktbc2QgJkv-oDi60',
+                                  host='db-mysql-nyc3-89566-do-user-8045222-0.c.db.ondigitalocean.com',
+                                  port=25060,
+                                  database='crowdicate')
+    if cnx and cnx.is_connected():
+        with cnx.cursor() as cursor:
+            result = cursor.execute("delete FROM `crowdicate`.`predictions` where post in (" + post_id + ")")
+
+        cnx.commit()
+
+        cnx.close()
+        return "success"
+    else:
+        return "Could not connect"
+
+
+
 # Press the green button in the gutter to run the script.
 if __name__ == '__main__':
     application.run()
