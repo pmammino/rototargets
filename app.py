@@ -1799,7 +1799,7 @@ def delete_predictions(post_id):
                                   database='crowdicate')
     if cnx and cnx.is_connected():
         with cnx.cursor() as cursor:
-            result = cursor.execute("delete FROM `crowdicate`.`predictions` where post in (" + post_id + ")")
+            result = cursor.execute("delete FROM `crowdicate`.`predictions` where post in ('" + post_id + "')")
 
         cnx.commit()
 
