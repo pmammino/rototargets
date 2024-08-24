@@ -1808,6 +1808,50 @@ def delete_predictions(post_id):
     else:
         return "Could not connect"
 
+@application.route("/predict_single/<string:page_id>/<string:post_id>/<string:predictable_id>/<string:prediction>")
+def predict_single(page_id,post_id,predictable_id,prediction):
+    cnx = mysql.connector.connect(user='doadmin', password='AVNS_Lkaktbc2QgJkv-oDi60',
+                                  host='db-mysql-nyc3-89566-do-user-8045222-0.c.db.ondigitalocean.com',
+                                  port=25060,
+                                  database='crowdicate')
+    if cnx and cnx.is_connected():
+        with cnx.cursor() as cursor:
+            result = cursor.execute("SELECT * FROM predictables")
+
+            rows = cursor.fetchall()
+
+            results = pd.DataFrame(list(rows), columns=["id", "amount", "player", "player_id", "type"])
+            current_week = 1
+
+            results['date'] = np.where(results["type"].str.contains('NFL'),
+                                       "Week " + str(current_week),
+                                       str(datetime.today().strftime("%m/%d/%Y")))
+
+            results['prediction'] = ""
+            template = results["id" = predictable_id]
+            template = template[
+                ["id", "amount", "player_id", "player", "type", "date", "prediction"]]
+            template = template.sort_values(["type", 'player', 'amount'], ascending=[True, True, True])
+
+            template["post"] = post_id
+            template["page"] = page_id
+            template['prediction'] = prediction
+            template = template[template[['prediction']].notnull().all(1)]
+            template['predictable'] = template["id"]
+            template["id"] = [uuid.uuid4().hex for _ in range(len(template.index))]
+
+            template = template[["id", "predictable", "date", "page", "post", "prediction"]]
+
+            cursor.executemany("""INSERT INTO predictions
+                                                      (id,predictable,date,page,post,prediction) 
+                                                      VALUES (%s,%s,%s,%s,%s,%s);""",
+                               list(template.itertuples(index=False, name=None)))
+            cnx.commit()
+
+        cnx.close()
+        return "success"
+    else:
+        return "Could not connect"
 
 
 # Press the green button in the gutter to run the script.
