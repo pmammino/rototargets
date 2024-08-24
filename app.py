@@ -211,7 +211,7 @@ def get_template(page_id):
         return ("Could not connect")
     results = pd.DataFrame(list(rows), columns=["id", "amount", "player", "player_id", "type"])
     results['date'] = np.where(results["type"].str.contains('NFL'),
-                            "Week" + str(current_week),
+                            "Week " + str(current_week),
                             str(datetime.today().strftime("%m/%d/%Y")))
     results['prediction'] = ""
     type_list = results_type['type_text'].tolist()
