@@ -183,9 +183,10 @@ def get_template(page_id):
                     splitting = test.split(' @ ')
                     link_list.append(splitting[0])
                     link_list.append(splitting[1])
-                    
+
+    current_week = 1
+
     if any("NFL" in s for s in types):
-        current_week = 1
         schedule = pd.read_csv("schedule.csv")
         schedule["game"] = schedule["home_team"] + " @ " + schedule["away_team"]
         schedule = schedule[schedule['week'] == current_week]
