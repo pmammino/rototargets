@@ -189,7 +189,7 @@ def get_template(page_id):
 
     if any("NFL" in s for s in type_list):
         schedule = pd.read_csv("schedule.csv")
-        schedule["game"] = schedule["home_team"] + " @ " + schedule["away_team"]
+        schedule["game"] = schedule["away_team"] + " @ " + schedule["home_team"]
         schedule = schedule[schedule['week'] == current_week]
         games = schedule["game"].tolist()
         games = games + schedule["home_team"].tolist()
