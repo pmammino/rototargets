@@ -1864,8 +1864,6 @@ def test_bet(market,alt,books = None):
         predictions_live['diff'] = ((((1/predictions_live['Im_Prob'])-1) * predictions_live['prediction'])+((1-(predictions_live['prediction']))*-1)).round(4)
 
 
-        predictions_live["outcome_point"] = ""
-
         predictions_live = predictions_live.dropna(subset=['prediction', 'page', 'diff'])
         predictions_live = predictions_live.sort_values(["outcome_name", 'outcome_point'], ascending=[True, True])
 
