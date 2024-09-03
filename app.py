@@ -1618,7 +1618,7 @@ def test_bet(market,alt,books = None):
                 'markets': 'h2h',
                 'oddsFormat': 'american',
                 'commenceTimeFrom': datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ'),
-                'commenceTimeTo': (datetime.utcnow() + timedelta(days=1)).replace(hour=6, minute=0).strftime(
+                'commenceTimeTo': (datetime.utcnow() + timedelta(days=6)).replace(hour=6, minute=0).strftime(
                     '%Y-%m-%dT%H:%M:%SZ')
             }
         else:
@@ -1629,7 +1629,7 @@ def test_bet(market,alt,books = None):
                 'markets': 'h2h',
                 'oddsFormat': 'american',
                 'commenceTimeFrom': datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ'),
-                'commenceTimeTo': (datetime.utcnow() + timedelta(days=1)).replace(hour=6, minute=0).strftime(
+                'commenceTimeTo': (datetime.utcnow() + timedelta(days=6)).replace(hour=6, minute=0).strftime(
                     '%Y-%m-%dT%H:%M:%SZ')
             }
 
@@ -1696,7 +1696,7 @@ def test_bet(market,alt,books = None):
             with cnx.cursor() as cursor:
                 cursor.execute("SET time_zone = 'EST';")
                 result = cursor.execute(
-                    "SELECT s.predictable,s.date,s.page,s.prediction,t.id,t.type, t.amount,t.player,t.player_id FROM crowdicate.predictions as s left join crowdicate.predictables as t on s.predictable = t.id WHERE STR_TO_DATE(s.date, '%m/%d/%Y') = CURDATE()"
+                    "SELECT s.predictable,s.date,s.page,s.prediction,t.id,t.type, t.amount,t.player,t.player_id FROM crowdicate.predictions as s left join crowdicate.predictables as t on s.predictable = t.id WHERE s.date = 'Week 1'"
                 )
 
                 rows = cursor.fetchall()
@@ -1764,7 +1764,7 @@ def test_bet(market,alt,books = None):
                 'markets': 'spreads',
                 'oddsFormat': 'american',
                 'commenceTimeFrom': datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ'),
-                'commenceTimeTo': (datetime.utcnow() + timedelta(days=1)).replace(hour=6, minute=0).strftime(
+                'commenceTimeTo': (datetime.utcnow() + timedelta(days=6)).replace(hour=6, minute=0).strftime(
                     '%Y-%m-%dT%H:%M:%SZ')
             }
         else:
@@ -1775,7 +1775,7 @@ def test_bet(market,alt,books = None):
                 'markets': 'spreads',
                 'oddsFormat': 'american',
                 'commenceTimeFrom': datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ'),
-                'commenceTimeTo': (datetime.utcnow() + timedelta(days=1)).replace(hour=6, minute=0).strftime(
+                'commenceTimeTo': (datetime.utcnow() + timedelta(days=6)).replace(hour=6, minute=0).strftime(
                     '%Y-%m-%dT%H:%M:%SZ')
             }
 
@@ -1842,7 +1842,7 @@ def test_bet(market,alt,books = None):
             with cnx.cursor() as cursor:
                 cursor.execute("SET time_zone = 'EST';")
                 result = cursor.execute(
-                    "SELECT s.predictable,s.date,s.page,s.prediction,t.id,t.type, t.amount,t.player,t.player_id FROM crowdicate.predictions as s left join crowdicate.predictables as t on s.predictable = t.id WHERE STR_TO_DATE(s.date, '%m/%d/%Y') = CURDATE()"
+                    "SELECT s.predictable,s.date,s.page,s.prediction,t.id,t.type, t.amount,t.player,t.player_id FROM crowdicate.predictions as s left join crowdicate.predictables as t on s.predictable = t.id WHERE s.date = 'Week 1'"
                 )
 
                 rows = cursor.fetchall()
@@ -1854,7 +1854,7 @@ def test_bet(market,alt,books = None):
                                         'player_id'])
 
         predictions_live = filtered_df.merge(results[["player", "amount", "prediction", "page"]], how='left',
-                                             left_on=['outcome_name'], right_on=['player'])
+                                             left_on=['outcome_name',"outcome_point"], right_on=['player',"amount"])
         # predictions_live['diff'] = (((predictions_live['prediction'] - predictions_live['Im_Prob']) / predictions_live[
         #    'Im_Prob']) * 100).round(1)
 
@@ -1988,7 +1988,7 @@ def test_bet(market,alt,books = None):
             with cnx.cursor() as cursor:
                 cursor.execute("SET time_zone = 'EST';")
                 result = cursor.execute(
-                    "SELECT s.predictable,s.date,s.page,s.prediction,t.id,t.type, t.amount,t.player,t.player_id FROM crowdicate.predictions as s left join crowdicate.predictables as t on s.predictable = t.id WHERE STR_TO_DATE(s.date, '%m/%d/%Y') = CURDATE()"
+                    "SELECT s.predictable,s.date,s.page,s.prediction,t.id,t.type, t.amount,t.player,t.player_id FROM crowdicate.predictions as s left join crowdicate.predictables as t on s.predictable = t.id WHERE s.date = 'Week 1'"
                 )
 
                 rows = cursor.fetchall()
@@ -2000,7 +2000,7 @@ def test_bet(market,alt,books = None):
                                         'player_id'])
 
         predictions_live = filtered_df.merge(results[["player", "amount", "prediction", "page"]], how='left',
-                                             left_on=['outcome_name'], right_on=['player'])
+                                             left_on=['outcome_name',"outcome_point"], right_on=['player',"amount"])
         # predictions_live['diff'] = (((predictions_live['prediction'] - predictions_live['Im_Prob']) / predictions_live[
         #    'Im_Prob']) * 100).round(1)
 
