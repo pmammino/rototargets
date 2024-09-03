@@ -1706,6 +1706,7 @@ def test_bet(market,alt,books = None):
         results = pd.DataFrame(list(rows),
                                columns=["predictable", "date", "page", "prediction", 'id', 'type', 'amount', 'player',
                                         'player_id'])
+        results = results[results.type == 'NFL - Moneyline']
 
         predictions_live = filtered_df.merge(results[["player", "amount", "prediction", "page"]], how='left',
                                              left_on=['outcome_name'], right_on=['player'])
@@ -1853,6 +1854,8 @@ def test_bet(market,alt,books = None):
                                columns=["predictable", "date", "page", "prediction", 'id', 'type', 'amount', 'player',
                                         'player_id'])
 
+        results = results[results.type == 'NFL - Spread']
+
         predictions_live = filtered_df.merge(results[["player", "amount", "prediction", "page"]], how='left',
                                              left_on=['outcome_name',"outcome_point"], right_on=['player',"amount"])
         # predictions_live['diff'] = (((predictions_live['prediction'] - predictions_live['Im_Prob']) / predictions_live[
@@ -1998,6 +2001,7 @@ def test_bet(market,alt,books = None):
         results = pd.DataFrame(list(rows),
                                columns=["predictable", "date", "page", "prediction", 'id', 'type', 'amount', 'player',
                                         'player_id'])
+        results = results[results.type == 'NFL - Team Game Totals']
 
         predictions_live = filtered_df.merge(results[["player", "amount", "prediction", "page"]], how='left',
                                              left_on=['outcome_name',"outcome_point"], right_on=['player',"amount"])
