@@ -186,7 +186,7 @@ def get_template(page_id):
 
     current_week = 1
 
-    if any("NFL" in s for s in types):
+    if any("NFL" in s for s in results_type):
         schedule = pd.read_csv("schedule.csv")
         schedule["game"] = schedule["home_team"] + " @ " + schedule["away_team"]
         schedule = schedule[schedule['week'] == current_week]
