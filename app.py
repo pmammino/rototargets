@@ -377,7 +377,6 @@ def generate_leaderboard(days = None,type_id = None):
         results = pd.DataFrame(list(rows),
                                columns=['id', "predictable", "date", "page", "prediction", "result", 'type'])
         results = results[results[['result']].notnull().all(1)]
-        results = results[results.type == name]
 
         # Grouping DataFrame by 'type' and calculating Brier score for each group
         brier_scores = results.groupby('page').apply(
