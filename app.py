@@ -359,7 +359,7 @@ def export_predictions(post_id):
 @application.route("/leaderboard/")
 @application.route("/leaderboard/<string:days>/<string:type_id>")
 def generate_leaderboard(days = None,type_id = None):
-    if type_id = None:
+    if type_id is None:
         cnx = mysql.connector.connect(user='doadmin', password='AVNS_Lkaktbc2QgJkv-oDi60',
                                       host='db-mysql-nyc3-89566-do-user-8045222-0.c.db.ondigitalocean.com',
                                       port=25060,
