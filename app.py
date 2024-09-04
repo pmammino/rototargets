@@ -356,8 +356,44 @@ def export_predictions(post_id):
     template = template.sort_values(["type",'player', 'amount'], ascending=[True, True,True])
     return template.to_json(orient='records')
 
+@application.route("/leaderboard/")
 @application.route("/leaderboard/<string:days>/<string:type_id>")
-def generate_leaderboard(days,type_id):
+def generate_leaderboard(days = None,type_id = None):
+    if type_id = None:
+        cnx = mysql.connector.connect(user='doadmin', password='AVNS_Lkaktbc2QgJkv-oDi60',
+                                      host='db-mysql-nyc3-89566-do-user-8045222-0.c.db.ondigitalocean.com',
+                                      port=25060,
+                                      database='crowdicate')
+        if cnx and cnx.is_connected():
+            with cnx.cursor() as cursor:
+                result = cursor.execute(
+                    "select a.id,a.predictable,a.date,a.page,a.prediction,a.result,t.type from `crowdicate`.`predictions` as a left join `crowdicate`.`predictables` as t on a.predictable = t.id WHERE STR_TO_DATE(date, '%m/%d/%Y') BETWEEN DATE_SUB(NOW(), INTERVAL "
+                    + days + " DAY) AND NOW()"
+                    )
+
+                rows = cursor.fetchall()
+
+            cnx.close()
+
+        results = pd.DataFrame(list(rows),
+                               columns=['id', "predictable", "date", "page", "prediction", "result", 'type'])
+        results = results[results[['result']].notnull().all(1)]
+        results = results[results.type == name]
+
+        # Grouping DataFrame by 'type' and calculating Brier score for each group
+        brier_scores = results.groupby('page').apply(
+            lambda group: brier_score_loss(group['result'], group['prediction']))
+        brier_scores = brier_scores.to_frame()
+        brier_scores = brier_scores.rename(columns={0: 'score'})
+        brier_scores['page'] = brier_scores.index
+        brier_scores.reset_index(drop=True, inplace=True)
+        preds = results.groupby('page').count()
+        preds['page_id'] = preds.index
+        brier_scores = brier_scores.merge(preds[["id", "page_id"]], how='left',
+                                          left_on='page', right_on='page_id')
+        brier_scores = brier_scores.sort_values(by='score', ascending=True)
+        brier_scores = brier_scores[["score", "page", "id"]]
+        return brier_scores.to_json(orient='records')
     response = requests.get("https://crowdicate.com/api/1.1/obj/types")
     data = response.json()
     results = pd.DataFrame(data["response"]["results"])
