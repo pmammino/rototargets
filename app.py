@@ -437,29 +437,40 @@ def generate_leaderboard(days = None,type_id = None):
     brier_scores = brier_scores[["score", "page", "id"]]
     return brier_scores.to_json(orient='records')
 
-@application.route("/score_post/<string:post_id>")
-def get_score_post(post_id):
-    cnx = mysql.connector.connect(user = 'doadmin',password = 'AVNS_Lkaktbc2QgJkv-oDi60',
-    host = 'db-mysql-nyc3-89566-do-user-8045222-0.c.db.ondigitalocean.com',
-      port = 25060,
-    database = 'crowdicate')
+@application.route("/score_post")
+def get_score_post():
+    cnx = mysql.connector.connect(user='doadmin', password='AVNS_Lkaktbc2QgJkv-oDi60',
+                                  host='db-mysql-nyc3-89566-do-user-8045222-0.c.db.ondigitalocean.com',
+                                  port=25060,
+                                  database='crowdicate')
     if cnx and cnx.is_connected():
-
         with cnx.cursor() as cursor:
-
-            result = cursor.execute("SELECT * FROM predictions")
+            result = cursor.execute(
+                "select a.id,a.predictable,a.date,a.post,a.prediction,a.result,t.type from `crowdicate`.`predictions` as a left join `crowdicate`.`predictables` as t on a.predictable = t.id"
+            )
 
             rows = cursor.fetchall()
 
         cnx.close()
 
-    else:
-        return print("Could not connect")
-    results = pd.DataFrame(list(rows), columns=["id", "predictable", "date", "page", "post","prediction","result"])
-    results["result"] = pd.to_numeric(results["result"])
+    results = pd.DataFrame(list(rows),
+                           columns=['id', "predictable", "date", "post", "prediction", "result", 'type'])
     results = results[results[['result']].notnull().all(1)]
-    model = results[results.post == post_id]
-    brier = brier_score_loss(model["result"], model["prediction"])
+
+    # Grouping DataFrame by 'type' and calculating Brier score for each group
+    brier_scores = results.groupby('post').apply(
+        lambda group: brier_score_loss(group['result'], group['prediction']))
+    brier_scores = brier_scores.to_frame()
+    brier_scores = brier_scores.rename(columns={0: 'score'})
+    brier_scores['post'] = brier_scores.index
+    brier_scores.reset_index(drop=True, inplace=True)
+    preds = results.groupby('post').count()
+    preds['post_id'] = preds.index
+    brier_scores = brier_scores.merge(preds[["id", "post_id"]], how='left',
+                                      left_on='post', right_on='post_id')
+    brier_scores = brier_scores.sort_values(by='score', ascending=True)
+    brier_scores = brier_scores[["score", "post", "id"]]
+    return brier_scores.to_json(orient='records')
     return pd.Series(brier).to_json(orient='records')
 
 @application.route("/bet_finder/<string:post_id>")
