@@ -184,7 +184,7 @@ def get_template(page_id):
                     link_list.append(splitting[0])
                     link_list.append(splitting[1])
 
-    current_week = 1
+    current_week = 2
     type_list = results_type['type_text'].tolist()
 
     if any("NFL" in s for s in type_list):
@@ -2319,7 +2319,7 @@ def predict_single(page_id,post_id,predictable_id,prediction):
             rows = cursor.fetchall()
 
             results = pd.DataFrame(list(rows), columns=["id", "amount", "player", "player_id", "type"])
-            current_week = 1
+            current_week = 2
 
             results['date'] = np.where(results["type"].str.contains('NFL'),
                                        "Week " + str(current_week),
