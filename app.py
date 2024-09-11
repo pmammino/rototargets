@@ -1742,7 +1742,7 @@ def test_bet(market,alt,books = None):
             with cnx.cursor() as cursor:
                 cursor.execute("SET time_zone = 'EST';")
                 result = cursor.execute(
-                    "SELECT s.predictable,s.date,s.page,s.prediction,t.id,t.type, t.amount,t.player,t.player_id FROM crowdicate.predictions as s left join crowdicate.predictables as t on s.predictable = t.id WHERE s.date = 'Week" + str(current_week) + "'"
+                    "SELECT s.predictable,s.date,s.page,s.prediction,t.id,t.type, t.amount,t.player,t.player_id FROM crowdicate.predictions as s left join crowdicate.predictables as t on s.predictable = t.id WHERE s.date = 'Week " + str(current_week) + "'"
                 )
 
                 rows = cursor.fetchall()
@@ -1889,7 +1889,7 @@ def test_bet(market,alt,books = None):
             with cnx.cursor() as cursor:
                 cursor.execute("SET time_zone = 'EST';")
                 result = cursor.execute(
-                    "SELECT s.predictable,s.date,s.page,s.prediction,t.id,t.type, t.amount,t.player,t.player_id FROM crowdicate.predictions as s left join crowdicate.predictables as t on s.predictable = t.id WHERE s.date = 'Week" + str(current_week) + "'"
+                    "SELECT s.predictable,s.date,s.page,s.prediction,t.id,t.type, t.amount,t.player,t.player_id FROM crowdicate.predictions as s left join crowdicate.predictables as t on s.predictable = t.id WHERE s.date = 'Week " + str(current_week) + "'"
                 )
 
                 rows = cursor.fetchall()
@@ -2044,7 +2044,7 @@ def test_bet(market,alt,books = None):
             with cnx.cursor() as cursor:
                 cursor.execute("SET time_zone = 'EST';")
                 result = cursor.execute(
-                    "SELECT s.predictable,s.date,s.page,s.prediction,t.id,t.type, t.amount,t.player,t.player_id FROM crowdicate.predictions as s left join crowdicate.predictables as t on s.predictable = t.id WHERE s.date = 'Week" + str(current_week) + "'"
+                    "SELECT s.predictable,s.date,s.page,s.prediction,t.id,t.type, t.amount,t.player,t.player_id FROM crowdicate.predictions as s left join crowdicate.predictables as t on s.predictable = t.id WHERE s.date = 'Week " + str(current_week) + "'"
                 )
 
                 rows = cursor.fetchall()
