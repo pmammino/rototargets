@@ -1267,6 +1267,7 @@ def bet_finder_strikeouts(post_id):
 @application.route("/test_bet_finder/<string:market>/<string:alt>/")
 @application.route("/test_bet_finder/<string:market>/<string:alt>/<string:books>")
 def test_bet(market,alt,books = None):
+    current_week = 2
     if market == "strikeouts":
         # API endpoint and key
         url = "https://api.the-odds-api.com/v4/sports/baseball_mlb/events/"
@@ -1741,7 +1742,7 @@ def test_bet(market,alt,books = None):
             with cnx.cursor() as cursor:
                 cursor.execute("SET time_zone = 'EST';")
                 result = cursor.execute(
-                    "SELECT s.predictable,s.date,s.page,s.prediction,t.id,t.type, t.amount,t.player,t.player_id FROM crowdicate.predictions as s left join crowdicate.predictables as t on s.predictable = t.id WHERE s.date = 'Week 1'"
+                    "SELECT s.predictable,s.date,s.page,s.prediction,t.id,t.type, t.amount,t.player,t.player_id FROM crowdicate.predictions as s left join crowdicate.predictables as t on s.predictable = t.id WHERE s.date = 'Week" + current_week + "'"
                 )
 
                 rows = cursor.fetchall()
@@ -1888,7 +1889,7 @@ def test_bet(market,alt,books = None):
             with cnx.cursor() as cursor:
                 cursor.execute("SET time_zone = 'EST';")
                 result = cursor.execute(
-                    "SELECT s.predictable,s.date,s.page,s.prediction,t.id,t.type, t.amount,t.player,t.player_id FROM crowdicate.predictions as s left join crowdicate.predictables as t on s.predictable = t.id WHERE s.date = 'Week 1'"
+                    "SELECT s.predictable,s.date,s.page,s.prediction,t.id,t.type, t.amount,t.player,t.player_id FROM crowdicate.predictions as s left join crowdicate.predictables as t on s.predictable = t.id WHERE s.date = 'Week" + current_week + "'"
                 )
 
                 rows = cursor.fetchall()
@@ -2043,7 +2044,7 @@ def test_bet(market,alt,books = None):
             with cnx.cursor() as cursor:
                 cursor.execute("SET time_zone = 'EST';")
                 result = cursor.execute(
-                    "SELECT s.predictable,s.date,s.page,s.prediction,t.id,t.type, t.amount,t.player,t.player_id FROM crowdicate.predictions as s left join crowdicate.predictables as t on s.predictable = t.id WHERE s.date = 'Week 1'"
+                    "SELECT s.predictable,s.date,s.page,s.prediction,t.id,t.type, t.amount,t.player,t.player_id FROM crowdicate.predictions as s left join crowdicate.predictables as t on s.predictable = t.id WHERE s.date = 'Week" + current_week + "'"
                 )
 
                 rows = cursor.fetchall()
