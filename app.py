@@ -19,7 +19,8 @@ from sklearn.ensemble import RandomForestRegressor
 from pybaseball import pitching_stats, team_batting, playerid_reverse_lookup
 import scipy
 from pytz import timezone
-
+import nfl_data_py as nfl
+import itertools
 
 application = Flask(__name__)
 application.secret_key = ''.join(random.choices(string.ascii_uppercase + string.digits, k=8))
