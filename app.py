@@ -2352,7 +2352,270 @@ def predict_single(page_id,post_id,predictable_id,prediction):
     else:
         return "Could not connect"
 
+@application.route("/predict_model_nfl/<string:post_id>/<string:page_id>/<string:model_id>")
+def predict_model_nfl(post_id,page_id,model_id):
+    response = requests.get("https://crowdicate.com/api/1.1/obj/models")
+    data = response.json()
+    results = pd.DataFrame(data["response"]["results"])
+    while data["response"]["remaining"] > 0:
+        cursor = data["response"]["cursor"] + 100
+        response = requests.get(
+            "https://crowdicate.com/api/1.1/obj/models" + "?cursor=" + str(
+                cursor) + "&limit=100")
+        data = response.json()
+        test = pd.DataFrame(data["response"]["results"])
+        results = pd.concat([results, test])
 
+    results = results[results._id == model_id]
+    metrics = results["metrics_list_text"].values[0]
+    trees = results["trees_number"].values[0]
+    types = results["type_custom_types"].values[0]
+
+    response = requests.get("https://crowdicate.com/api/1.1/obj/types")
+    data = response.json()
+    results = pd.DataFrame(data["response"]["results"])
+    while data["response"]["remaining"] > 0:
+        cursor = data["response"]["cursor"] + 100
+        response = requests.get(
+            "https://crowdicate.com/api/1.1/obj/types" + "?cursor=" + str(
+                cursor) + "&limit=100")
+        data = response.json()
+        test = pd.DataFrame(data["response"]["results"])
+        results = pd.concat([results, test])
+    name = results[results._id == types]
+    name = name["type_text"].values[0]
+
+    games_data = pd.read_csv("games_data_nfl.csv")
+    games_data["temp"] = games_data["temp"].fillna(70)
+    games_data["wind"] = games_data["wind"].fillna(0)
+    games_data = pd.get_dummies(data=games_data, columns=["stadium_id"])
+    spike_cols = [col for col in games_data.columns if 'stadium_id' in col]
+    if "stadium_id" in metrics:
+        metrics.remove("stadium_id")
+        metrics = metrics + spike_cols
+
+    pbp = pd.read_csv("https://github.com/nflverse/nflverse-data/releases/download/pbp/play_by_play_2024.csv")
+    passes = pbp[pbp.play_type == 'pass']
+    runs = pbp[pbp.play_type == 'run']
+
+    games_count = pbp[['posteam', "game_id"]]
+    games_count = games_count.drop_duplicates()
+    games_count = games_count.groupby(['posteam'])['posteam'].agg({'count'}).reset_index()
+    games_count = games_count.rename(columns={"count": "games"})
+    pass_off = passes.groupby(['posteam'])['epa'].agg({'sum', 'count', 'mean'}).reset_index()
+    pass_off = pass_off.rename(
+        columns={"posteam": "team", "sum": "total_pass_epa", "count": "pass_plays", "mean": "pass_epa"})
+    run_off = runs.groupby(['posteam'])['epa'].agg({'sum', 'count', 'mean'}).reset_index()
+    run_off = run_off.rename(
+        columns={"posteam": "team", "sum": "total_run_epa", "count": "run_plays", "mean": "run_epa"})
+    pass_def = passes.groupby(['defteam'])['epa'].agg({'sum', 'count', 'mean'}).reset_index()
+    pass_def = pass_def.rename(
+        columns={"defteam": "opponent", "sum": "total_pass_epa_defense", "count": "pass_plays_defense",
+                 "mean": "pass_epa_defense"})
+    run_def = runs.groupby(['defteam'])['epa'].agg({'sum', 'count', 'mean'}).reset_index()
+    run_def = run_def.rename(
+        columns={"defteam": "opponent", "sum": "total_run_epa_defense", "count": "run_plays_defense",
+                 "mean": "run_epa_defense"})
+    offense = pass_off.merge(run_off, how='left',
+                             left_on='team', right_on='team')
+    offense = offense.merge(games_count, how='left',
+                            left_on='team', right_on='posteam')
+    defense = pass_def.merge(run_def, how='left',
+                             left_on='opponent', right_on='opponent')
+    defense = defense.merge(games_count, how='left',
+                            left_on='opponent', right_on='posteam')
+
+    offense["pass_share"] = offense["pass_plays"] / (offense["pass_plays"] + offense["run_plays"])
+    defense["pass_share_defense"] = defense["pass_plays_defense"] / (
+                defense["pass_plays_defense"] + defense["run_plays_defense"])
+    offense["pace"] = (offense["pass_plays"] + offense["run_plays"]) / offense["games"]
+    defense["pace_defense"] = (defense["pass_plays_defense"] + defense["run_plays_defense"]) / defense["games"]
+
+    schedule = nfl.import_schedules([2024])
+    schedule = pd.get_dummies(data=schedule, columns=["stadium_id"])
+    spike_cols = [col for col in schedule.columns if 'stadium_id' in col]
+    week = schedule[schedule.week == 2].reset_index()
+
+    week["away_spread_line"] = week['spread_line']
+    week["home_spread_line"] = week["spread_line"] * -1
+    week["away_implied"] = (week['total_line'] / 2) - (week['spread_line'] / 2)
+    week["home_implied"] = (week['total_line'] / 2) + (week['spread_line'] / 2)
+    away_cols = ["away_team", "home_team", "away_rest", "away_moneyline", "away_spread_line", "home_rest",
+                 "away_spread_odds", "total_line", "under_odds", "over_odds", "div_game", "temp", "wind",
+                 "away_implied"] + spike_cols
+    home_cols = ["home_team", "away_team", "home_rest", "away_rest", "home_moneyline", "home_spread_line",
+                 "home_spread_odds", "total_line", "under_odds", "over_odds", "div_game", "temp", "wind",
+                 "home_implied"] + spike_cols
+    away = week[away_cols].reset_index()
+    home = week[home_cols].reset_index()
+    away["home"] = 0
+    home["home"] = 1
+    away = away.rename(
+        columns={"away_team": "team", "home_team": "opponent", "away_rest": "rest", "home_rest": "opponent_rest",
+                 "away_moneyline": "moneyline", "away_spread_line": "spread_line", "away_spread_odds": "spread_odds",
+                 "away_implied": "implied"})
+    home = home.rename(
+        columns={"home_team": "team", "away_team": "opponent", "home_rest": "rest", "away_rest": "opponent_rest",
+                 "home_moneyline": "moneyline", "home_spread_line": "spread_line", "home_spread_odds": "spread_odds",
+                 "home_implied": "implied"})
+
+    games = pd.concat([away, home])
+    games = games.merge(offense, how='left',
+                        left_on='team', right_on='team')
+    games = games.merge(defense, how='left',
+                        left_on='opponent', right_on='opponent')
+    games["temp"] = games["temp"].fillna(70)
+    games["wind"] = games["wind"].fillna(0)
+
+    x = games_data.loc[:,
+        metrics].values
+    y = games_data.loc[:, 'team_score'].values
+
+    regressor = RandomForestRegressor(n_estimators=500, random_state=0, oob_score=True)
+
+    regressor.fit(x, y)
+
+    for col in metrics:
+        if col not in games.columns:
+            games[col] = 0
+
+    predictions = regressor.predict(games[metrics])
+    games["pred"] = predictions
+    games_sub = games[["team", "opponent", "pred"]]
+    games_sub = games_sub.merge(games_sub, how='left',
+                                left_on='opponent', right_on='team')
+
+    games_sub["WP"] = (games_sub["pred_x"] ** 2.5) / (((games_sub["pred_x"] ** 2.5)) + (games_sub["pred_y"] ** 2.5))
+    teams = games["team"].tolist()
+
+    names = []
+    for tree in range(500):
+        vals = regressor.estimators_[tree].predict(games[metrics])
+        games[str(tree)] = pd.Series(vals)
+        names.append(str(tree))
+
+    spreads_lines = []
+    team_totals_lines = []
+    game_totals_lines = []
+    for num in games.index:
+        team = games['team'].loc[games.index[num]]
+        team_scores = games[games.team == team].reset_index()
+        team_scores = team_scores[names]
+        team_scores = team_scores.loc[0, :].values.tolist()
+        opp = games['opponent'].loc[games.index[0]]
+        opp_scores = games[games.team == opp].reset_index()
+        opp_scores = opp_scores[names]
+        opp_scores = opp_scores.loc[0, :].values.tolist()
+        team_totals = np.arange(15.5, 32.5, 1).tolist()
+        team_scores_df = pd.DataFrame(team_scores, columns=["score"])
+        for team_total in team_totals:
+            win = team_scores_df[team_scores_df.score > team_total].count().score / len(team_scores_df)
+            team_win = (team, win, team_total)
+            team_totals_lines.append(team_win)
+        combine_scores = list(itertools.product(team_scores, opp_scores))
+        combine_scores = pd.DataFrame(combine_scores, columns=("team", "opp"))
+        combine_scores["difference"] = combine_scores["opp"] - combine_scores["team"]
+        combine_scores["combined_total"] = combine_scores["team"] + combine_scores["opp"]
+        spreads = np.arange(-10.5, 11.5, 1).tolist()
+        for spread in spreads:
+            win = combine_scores[combine_scores.difference < spread].count().team / len(combine_scores.index)
+            team_win = (team, win, spread)
+            spreads_lines.append(team_win)
+        game_totals = np.arange(40.5, 52.5, 1).tolist()
+        for total in game_totals:
+            win = combine_scores[combine_scores.combined_total > total].count().team / len(combine_scores.index)
+            team_win = (team + " @ " + opp, win, total)
+            game_totals_lines.append(team_win)
+    spreads_all = pd.DataFrame(spreads_lines, columns=['team', 'WP', "spread"])
+    game_totals_all = pd.DataFrame(game_totals_lines, columns=['game', 'WP', "total"])
+    team_totals_all = pd.DataFrame(team_totals_lines, columns=['team', 'WP', "total"])
+
+    current_week = 2
+
+    schedule = pd.read_csv("schedule.csv")
+    schedule["game"] = schedule["away_team"] + " @ " + schedule["home_team"]
+    schedule = schedule[schedule['week'] == current_week]
+    games = schedule["game"].tolist()
+    games = games + schedule["home_team"].tolist()
+    games = games + schedule["away_team"].tolist()
+    link_list = games
+
+    cnx = mysql.connector.connect(user='doadmin', password='AVNS_Lkaktbc2QgJkv-oDi60',
+                                  host='db-mysql-nyc3-89566-do-user-8045222-0.c.db.ondigitalocean.com',
+                                  port=25060,
+                                  database='crowdicate')
+    if cnx and cnx.is_connected():
+
+        with cnx.cursor() as cursor:
+
+            result = cursor.execute("SELECT * FROM predictables")
+
+            rows = cursor.fetchall()
+
+        cnx.close()
+
+        results = pd.DataFrame(list(rows), columns=["id", "amount", "player", "player_id", "type"])
+        results['date'] = "Week " + str(current_week)
+        results['prediction'] = ""
+
+        results = results[results['type'] == name]
+        template = results[results['player_id'].isin(link_list) | results['player'].isin(link_list)]
+        template = template[
+            ["id", "amount", "player_id", "player", "type", "date", "prediction"]]
+
+        if name == "NFL - Moneyline":
+            template = template.merge(games_sub, how="left", left_on=['player_id'], right_on=['team_x'])
+            template["prediction"] = template["WP"]
+            template = template[template[['prediction']].notnull().all(1)]
+            group = template
+            group["predictable"] = group["id"]
+            group["id"] = [uuid.uuid4().hex for _ in range(len(group.index))]
+            group["page"] = page_id
+            group["post"] = post_id
+            group = group[["id", "predictable", "date", "page", "post", "prediction"]]
+        elif name == "NFL - Spreads":
+            template = template.merge(spreads_all, how="left", left_on=['player_id', 'amount'],
+                                      right_on=['team', 'spread'])
+            template["prediction"] = template["WP"]
+            template = template[template[['prediction']].notnull().all(1)]
+            group = template
+            group["predictable"] = group["id"]
+            group["id"] = [uuid.uuid4().hex for _ in range(len(group.index))]
+            group["page"] = page_id
+            group["post"] = post_id
+            group = group[["id", "predictable", "date", "page", "post", "prediction"]]
+        elif name == "NFL - Team Totals":
+            template = template.merge(team_totals_all, how="left", left_on=['player_id', 'amount'],
+                                      right_on=['team', 'total'])
+            template["prediction"] = template["WP"]
+            template = template[template[['prediction']].notnull().all(1)]
+            group = template
+            group["predictable"] = group["id"]
+            group["id"] = [uuid.uuid4().hex for _ in range(len(group.index))]
+            group["page"] = page_id
+            group["post"] = post_id
+            group = group[["id", "predictable", "date", "page", "post", "prediction"]]
+        else:
+            template = template.merge(game_totals_all, how="left", left_on=['player_id', 'amount'],
+                                      right_on=['game', 'total'])
+            template["prediction"] = template["WP"]
+            template = template[template[['prediction']].notnull().all(1)]
+            group = template
+            group["predictable"] = group["id"]
+            group["id"] = [uuid.uuid4().hex for _ in range(len(group.index))]
+            group["post"] = post_id
+            group["page"] = page_id
+            group = group[["id", "predictable", "date", "page", "post", "prediction"]]
+        cursor.executemany("""INSERT INTO predictions
+                                                  (id,predictable,date,page,post,prediction) 
+                                                  VALUES (%s,%s,%s,%s,%s,%s);""",
+                           list(group.itertuples(index=False, name=None)))
+        cnx.commit()
+
+        cnx.close()
+        return "success"
+    else:
+        return "Could not connect"
 # Press the green button in the gutter to run the script.
 if __name__ == '__main__':
     application.run()
