@@ -2358,6 +2358,7 @@ def predict_model_nfl(post_id,page_id,model_id):
     response = requests.get("https://crowdicate.com/api/1.1/obj/models")
     data = response.json()
     results = pd.DataFrame(data["response"]["results"])
+    current_week = 2
     while data["response"]["remaining"] > 0:
         cursor = data["response"]["cursor"] + 100
         response = requests.get(
@@ -2435,7 +2436,7 @@ def predict_model_nfl(post_id,page_id,model_id):
     schedule = nfl.import_schedules([2024])
     schedule = pd.get_dummies(data=schedule, columns=["stadium_id"])
     spike_cols = [col for col in schedule.columns if 'stadium_id' in col]
-    week = schedule[schedule.week == 2].reset_index()
+    week = schedule[schedule.week == current_week].reset_index()
 
     week["away_spread_line"] = week['spread_line']
     week["home_spread_line"] = week["spread_line"] * -1
@@ -2531,7 +2532,6 @@ def predict_model_nfl(post_id,page_id,model_id):
     game_totals_all = pd.DataFrame(game_totals_lines, columns=['game', 'WP', "total"])
     team_totals_all = pd.DataFrame(team_totals_lines, columns=['team', 'WP', "total"])
 
-    current_week = 2
 
     schedule = pd.read_csv("schedule.csv")
     schedule["game"] = schedule["away_team"] + " @ " + schedule["home_team"]
@@ -2554,66 +2554,66 @@ def predict_model_nfl(post_id,page_id,model_id):
             rows = cursor.fetchall()
 
 
-        results = pd.DataFrame(list(rows), columns=["id", "amount", "player", "player_id", "type"])
-        results['date'] = "Week " + str(current_week)
-        results['prediction'] = ""
+            results = pd.DataFrame(list(rows), columns=["id", "amount", "player", "player_id", "type"])
+            results['date'] = "Week " + str(current_week)
+            results['prediction'] = ""
 
-        results = results[results['type'] == name]
-        template = results[results['player_id'].isin(link_list) | results['player'].isin(link_list)]
-        template = template[
+            results = results[results['type'] == name]
+            template = results[results['player_id'].isin(link_list) | results['player'].isin(link_list)]
+            template = template[
             ["id", "amount", "player_id", "player", "type", "date", "prediction"]]
 
-        if name == "NFL - Moneyline":
-            template = template.merge(games_sub, how="left", left_on=['player_id'], right_on=['team_x'])
-            template["prediction"] = template["WP"]
-            template = template[template[['prediction']].notnull().all(1)]
-            group = template
-            group["predictable"] = group["id"]
-            group["id"] = [uuid.uuid4().hex for _ in range(len(group.index))]
-            group["page"] = page_id
-            group["post"] = post_id
-            group = group[["id", "predictable", "date", "page", "post", "prediction"]]
-        elif name == "NFL - Spreads":
-            template = template.merge(spreads_all, how="left", left_on=['player_id', 'amount'],
+            if name == "NFL - Moneyline":
+                template = template.merge(games_sub, how="left", left_on=['player_id'], right_on=['team_x'])
+                template["prediction"] = template["WP"]
+                template = template[template[['prediction']].notnull().all(1)]
+                group = template
+                group["predictable"] = group["id"]
+                group["id"] = [uuid.uuid4().hex for _ in range(len(group.index))]
+                group["page"] = page_id
+                group["post"] = post_id
+                group = group[["id", "predictable", "date", "page", "post", "prediction"]]
+            elif name == "NFL - Spreads":
+                template = template.merge(spreads_all, how="left", left_on=['player_id', 'amount'],
                                       right_on=['team', 'spread'])
-            template["prediction"] = template["WP"]
-            template = template[template[['prediction']].notnull().all(1)]
-            group = template
-            group["predictable"] = group["id"]
-            group["id"] = [uuid.uuid4().hex for _ in range(len(group.index))]
-            group["page"] = page_id
-            group["post"] = post_id
-            group = group[["id", "predictable", "date", "page", "post", "prediction"]]
-        elif name == "NFL - Team Totals":
-            template = template.merge(team_totals_all, how="left", left_on=['player_id', 'amount'],
+                template["prediction"] = template["WP"]
+                template = template[template[['prediction']].notnull().all(1)]
+                group = template
+                group["predictable"] = group["id"]
+                group["id"] = [uuid.uuid4().hex for _ in range(len(group.index))]
+                group["page"] = page_id
+                group["post"] = post_id
+                group = group[["id", "predictable", "date", "page", "post", "prediction"]]
+            elif name == "NFL - Team Totals":
+                template = template.merge(team_totals_all, how="left", left_on=['player_id', 'amount'],
                                       right_on=['team', 'total'])
-            template["prediction"] = template["WP"]
-            template = template[template[['prediction']].notnull().all(1)]
-            group = template
-            group["predictable"] = group["id"]
-            group["id"] = [uuid.uuid4().hex for _ in range(len(group.index))]
-            group["page"] = page_id
-            group["post"] = post_id
-            group = group[["id", "predictable", "date", "page", "post", "prediction"]]
-        else:
-            template = template.merge(game_totals_all, how="left", left_on=['player_id', 'amount'],
+                template["prediction"] = template["WP"]
+                template = template[template[['prediction']].notnull().all(1)]
+                group = template
+                group["predictable"] = group["id"]
+                group["id"] = [uuid.uuid4().hex for _ in range(len(group.index))]
+                group["page"] = page_id
+                group["post"] = post_id
+                group = group[["id", "predictable", "date", "page", "post", "prediction"]]
+            else:
+                template = template.merge(game_totals_all, how="left", left_on=['player_id', 'amount'],
                                       right_on=['game', 'total'])
-            template["prediction"] = template["WP"]
-            template = template[template[['prediction']].notnull().all(1)]
-            group = template
-            group["predictable"] = group["id"]
-            group["id"] = [uuid.uuid4().hex for _ in range(len(group.index))]
-            group["post"] = post_id
-            group["page"] = page_id
-            group = group[["id", "predictable", "date", "page", "post", "prediction"]]
-        cursor.executemany("""INSERT INTO predictions
+                template["prediction"] = template["WP"]
+                template = template[template[['prediction']].notnull().all(1)]
+                group = template
+                group["predictable"] = group["id"]
+                group["id"] = [uuid.uuid4().hex for _ in range(len(group.index))]
+                group["post"] = post_id
+                group["page"] = page_id
+                group = group[["id", "predictable", "date", "page", "post", "prediction"]]
+            cursor.executemany("""INSERT INTO predictions
                                                   (id,predictable,date,page,post,prediction) 
                                                   VALUES (%s,%s,%s,%s,%s,%s);""",
                            list(group.itertuples(index=False, name=None)))
-        cnx.commit()
+            cnx.commit()
 
-        cnx.close()
-        return "success"
+            cnx.close()
+            return "success"
     else:
         return "Could not connect"
 # Press the green button in the gutter to run the script.
