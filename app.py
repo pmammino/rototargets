@@ -2553,7 +2553,6 @@ def predict_model_nfl(post_id,page_id,model_id):
 
             rows = cursor.fetchall()
 
-        cnx.close()
 
         results = pd.DataFrame(list(rows), columns=["id", "amount", "player", "player_id", "type"])
         results['date'] = "Week " + str(current_week)
