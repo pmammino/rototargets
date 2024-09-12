@@ -24,7 +24,8 @@ mysql-connector-python = "*"
 pybaseball = "*"
 scipy = "*"
 pytz = "*"
-
+nfl_data_py = "*"
+itertools = "*"
 
 [dev-packages]
 pylint = "*"
