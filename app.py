@@ -412,8 +412,12 @@ def generate_leaderboard(days = None,type_id = None):
                                   database='crowdicate')
     if cnx and cnx.is_connected():
         with cnx.cursor() as cursor:
-            result = cursor.execute("select a.id,a.predictable,a.date,a.page,a.prediction,a.result,t.type from `crowdicate`.`predictions` as a left join `crowdicate`.`predictables` as t on a.predictable = t.id WHERE STR_TO_DATE(date, '%m/%d/%Y') BETWEEN DATE_SUB(NOW(), INTERVAL "
-            + days + " DAY) AND NOW()"
+            if days is None:
+                result = cursor.execute(
+                    "select a.id,a.predictable,a.date,a.page,a.prediction,a.result,t.type from `crowdicate`.`predictions` as a left join `crowdicate`.`predictables` as t on a.predictable = t.id"
+            else:
+                result = cursor.execute("select a.id,a.predictable,a.date,a.page,a.prediction,a.result,t.type from `crowdicate`.`predictions` as a left join `crowdicate`.`predictables` as t on a.predictable = t.id WHERE STR_TO_DATE(date, '%m/%d/%Y') BETWEEN DATE_SUB(NOW(), INTERVAL "
+                + days + " DAY) AND NOW()"
                                     )
 
             rows = cursor.fetchall()
