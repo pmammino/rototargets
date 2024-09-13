@@ -2509,7 +2509,7 @@ def predict_model_nfl(post_id,page_id,model_id):
         team_scores = games[games.team == team].reset_index()
         team_scores = team_scores[names]
         team_scores = team_scores.loc[0, :].values.tolist()
-        opp = games['opponent'].loc[games.index[0]]
+        opp = games['opponent'].loc[games.index[num]]
         opp_scores = games[games.team == opp].reset_index()
         opp_scores = opp_scores[names]
         opp_scores = opp_scores.loc[0, :].values.tolist()
@@ -2578,7 +2578,7 @@ def predict_model_nfl(post_id,page_id,model_id):
                 group["page"] = page_id
                 group["post"] = post_id
                 group = group[["id", "predictable", "date", "page", "post", "prediction"]]
-            elif name == "NFL - Spreads":
+            elif name == "NFL - Spread":
                 template = template.merge(spreads_all, how="left", left_on=['player_id', 'amount'],
                                       right_on=['team', 'spread'])
                 template["prediction"] = template["WP"]
