@@ -357,7 +357,7 @@ def export_predictions(post_id):
     template = template.sort_values(["type",'player', 'amount'], ascending=[True, True,True])
     return template.to_json(orient='records')
 
-@application.route("/leaderboard/")
+@application.route("/leaderboard//<string:type_id>")
 @application.route("/leaderboard/<string:days>/<string:type_id>")
 def generate_leaderboard(days = None,type_id = None):
     if type_id is None:
