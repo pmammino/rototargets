@@ -185,7 +185,7 @@ def get_template(page_id):
                     link_list.append(splitting[0])
                     link_list.append(splitting[1])
 
-    current_week = 2
+    current_week = 3
     type_list = results_type['type_text'].tolist()
 
     if any("NFL" in s for s in type_list):
@@ -1273,7 +1273,7 @@ def bet_finder_strikeouts(post_id):
 @application.route("/test_bet_finder/<string:market>/<string:alt>/")
 @application.route("/test_bet_finder/<string:market>/<string:alt>/<string:books>")
 def test_bet(market,alt,books = None):
-    current_week = 2
+    current_week = 3
     if market == "strikeouts":
         # API endpoint and key
         url = "https://api.the-odds-api.com/v4/sports/baseball_mlb/events/"
@@ -2326,7 +2326,7 @@ def predict_single(page_id,post_id,predictable_id,prediction):
             rows = cursor.fetchall()
 
             results = pd.DataFrame(list(rows), columns=["id", "amount", "player", "player_id", "type"])
-            current_week = 2
+            current_week = 3
 
             results['date'] = np.where(results["type"].str.contains('NFL'),
                                        "Week " + str(current_week),
@@ -2363,7 +2363,7 @@ def predict_model_nfl(post_id,page_id,model_id):
     response = requests.get("https://crowdicate.com/api/1.1/obj/models")
     data = response.json()
     results = pd.DataFrame(data["response"]["results"])
-    current_week = 2
+    current_week = 3
     while data["response"]["remaining"] > 0:
         cursor = data["response"]["cursor"] + 100
         response = requests.get(
