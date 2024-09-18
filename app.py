@@ -2653,7 +2653,7 @@ def get_aggregate_nfl(post_id,page,type):
             types = cursor.fetchall()
 
             results = pd.DataFrame(list(rows),columns=["id", "predictable", "date", "page", "post","prediction","result"])
-            results = results[results['date'] == "Week " + str(current_week)
+            results = results[results['date'] == "Week " + str(current_week)]
             results['date'] = "Week " + str(current_week)
             group = results.groupby(['predictable','date'])['prediction'].agg({'mean'}).reset_index()
             predictables = pd.DataFrame(list(types), columns=["id", "amount", "player", "player_id", "type"])
