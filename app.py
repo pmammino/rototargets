@@ -3232,7 +3232,7 @@ def get_market_nfl(post_id,page_id,type_id):
                 template = template.sort_values(["type", 'player', 'amount'], ascending=[True, True, True])
 
                 template = template.merge(group, how='left', left_on=['player', "amount"],
-                                          right_on=['player_name', "outcome_point"])
+                                          right_on=['outcome_name', "outcome_point"])
                 template["post"] = post_id
                 template["page"] = page_id
                 template['prediction'] = template['mean']
