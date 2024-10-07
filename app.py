@@ -1670,7 +1670,7 @@ def test_bet(market,alt,books = None):
                 'markets': 'h2h',
                 'oddsFormat': 'american',
                 'commenceTimeFrom': datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ'),
-                'commenceTimeTo': (datetime.utcnow() + timedelta(days=6)).replace(hour=6, minute=0).strftime(
+                'commenceTimeTo': (datetime.utcnow() + timedelta(days=3)).replace(hour=6, minute=0).strftime(
                     '%Y-%m-%dT%H:%M:%SZ')
             }
         else:
@@ -1681,7 +1681,7 @@ def test_bet(market,alt,books = None):
                 'markets': 'h2h',
                 'oddsFormat': 'american',
                 'commenceTimeFrom': datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ'),
-                'commenceTimeTo': (datetime.utcnow() + timedelta(days=6)).replace(hour=6, minute=0).strftime(
+                'commenceTimeTo': (datetime.utcnow() + timedelta(days=3)).replace(hour=6, minute=0).strftime(
                     '%Y-%m-%dT%H:%M:%SZ')
             }
 
@@ -1817,7 +1817,7 @@ def test_bet(market,alt,books = None):
                 'markets': 'spreads',
                 'oddsFormat': 'american',
                 'commenceTimeFrom': datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ'),
-                'commenceTimeTo': (datetime.utcnow() + timedelta(days=6)).replace(hour=6, minute=0).strftime(
+                'commenceTimeTo': (datetime.utcnow() + timedelta(days=3)).replace(hour=6, minute=0).strftime(
                     '%Y-%m-%dT%H:%M:%SZ')
             }
         else:
@@ -1828,7 +1828,7 @@ def test_bet(market,alt,books = None):
                 'markets': 'spreads',
                 'oddsFormat': 'american',
                 'commenceTimeFrom': datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ'),
-                'commenceTimeTo': (datetime.utcnow() + timedelta(days=6)).replace(hour=6, minute=0).strftime(
+                'commenceTimeTo': (datetime.utcnow() + timedelta(days=3)).replace(hour=6, minute=0).strftime(
                     '%Y-%m-%dT%H:%M:%SZ')
             }
 
@@ -1963,7 +1963,7 @@ def test_bet(market,alt,books = None):
                 'markets': 'totals',
                 'oddsFormat': 'american',
                 'commenceTimeFrom': datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ'),
-                'commenceTimeTo': (datetime.utcnow() + timedelta(days=6)).replace(hour=6, minute=0).strftime(
+                'commenceTimeTo': (datetime.utcnow() + timedelta(days=3)).replace(hour=6, minute=0).strftime(
                     '%Y-%m-%dT%H:%M:%SZ')
             }
         else:
@@ -1974,7 +1974,7 @@ def test_bet(market,alt,books = None):
                 'markets': 'totals',
                 'oddsFormat': 'american',
                 'commenceTimeFrom': datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ'),
-                'commenceTimeTo': (datetime.utcnow() + timedelta(days=6)).replace(hour=6, minute=0).strftime(
+                'commenceTimeTo': (datetime.utcnow() + timedelta(days=3)).replace(hour=6, minute=0).strftime(
                     '%Y-%m-%dT%H:%M:%SZ')
             }
 
@@ -2805,7 +2805,7 @@ def get_market_nfl(post_id,page_id,type_id):
             'markets': 'team_totals',
             'oddsFormat': 'american',
             'commenceTimeFrom': datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ'),
-            'commenceTimeTo': (datetime.utcnow() + timedelta(days=6)).replace(hour=6, minute=0).strftime(
+            'commenceTimeTo': (datetime.utcnow() + timedelta(days=3)).replace(hour=6, minute=0).strftime(
                 '%Y-%m-%dT%H:%M:%SZ')
         }
         response = requests.get(url, params=params)
@@ -2956,7 +2956,7 @@ def get_market_nfl(post_id,page_id,type_id):
             'markets': 'alternate_totals',
             'oddsFormat': 'american',
             'commenceTimeFrom': datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ'),
-            'commenceTimeTo': (datetime.utcnow() + timedelta(days=6)).replace(hour=6, minute=0).strftime(
+            'commenceTimeTo': (datetime.utcnow() + timedelta(days=3)).replace(hour=6, minute=0).strftime(
                 '%Y-%m-%dT%H:%M:%SZ')
         }
         response = requests.get(url, params=params)
@@ -3111,7 +3111,7 @@ def get_market_nfl(post_id,page_id,type_id):
             'markets': 'alternate_spreads',
             'oddsFormat': 'american',
             'commenceTimeFrom': datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ'),
-            'commenceTimeTo': (datetime.utcnow() + timedelta(days=6)).replace(hour=6, minute=0).strftime(
+            'commenceTimeTo': (datetime.utcnow() + timedelta(days=3)).replace(hour=6, minute=0).strftime(
                 '%Y-%m-%dT%H:%M:%SZ')
         }
         response = requests.get(url, params=params)
