@@ -2130,8 +2130,6 @@ def test_bet(market,alt,books = None):
                                           -filtered_df['outcome_price'] / (-filtered_df['outcome_price'] + 100))
 
         teams = pd.read_csv("nfl_teams.csv")
-        filtered_df = filtered_df.merge(teams, how='left',
-                                        left_on=['player_name'], right_on=['team'])
         cnx = mysql.connector.connect(user='doadmin', password='AVNS_Lkaktbc2QgJkv-oDi60',
                                       host='db-mysql-nyc3-89566-do-user-8045222-0.c.db.ondigitalocean.com',
                                       port=25060,
@@ -2153,7 +2151,7 @@ def test_bet(market,alt,books = None):
         results = results[results.type == 'NFL - Team Totals']
 
         predictions_live = filtered_df.merge(results[["player", "amount", "prediction", "page"]], how='left',
-                                             left_on=['abbreviation', "outcome_point"], right_on=['player', "amount"])
+                                             left_on=['player_name', "outcome_point"], right_on=['player', "amount"])
         # predictions_live['diff'] = (((predictions_live['prediction'] - predictions_live['Im_Prob']) / predictions_live[
         #    'Im_Prob']) * 100).round(1)
 
@@ -2161,7 +2159,7 @@ def test_bet(market,alt,books = None):
                 (1 - (predictions_live['prediction'])) * -1)).round(4)
 
         predictions_live = predictions_live.dropna(subset=['prediction', 'page', 'diff'])
-        predictions_live = predictions_live.sort_values(["outcome_name", 'outcome_point'], ascending=[True, True])
+        predictions_live = predictions_live.sort_values(["abbreviation", 'outcome_point'], ascending=[True, True])
 
         # Group the data
         grouped = predictions_live.groupby(['abbreviation', 'bookmaker_title', 'outcome_price', 'outcome_point'])
