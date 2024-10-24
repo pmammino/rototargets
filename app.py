@@ -1948,6 +1948,249 @@ def test_bet(market,alt,books = None):
         }
 
         return json.dumps(final_json, indent=2)
+    elif market == "nfl_team_totals":
+        url = "https://api.the-odds-api.com/v4/sports/americanfootball_nfl/events/"
+        api_key = "22a6282c9744177b06acb842d34a02cb"
+        if books is not None:
+            if alt == 'y':
+                params = {
+                    'apiKey': api_key,
+                    'regions': 'us',
+                    ##'markets': 'h2h,spreads',
+                    ##'markets': 'pitcher_strikeouts_alternate,batter_total_bases',
+                    'bookmakers': books.replace("-", ","),
+                    'markets': 'team_totals',
+                    'oddsFormat': 'american',
+                    'commenceTimeFrom': datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ'),
+                    'commenceTimeTo': (datetime.utcnow() + timedelta(days=6)).replace(hour=6, minute=0).strftime(
+                        '%Y-%m-%dT%H:%M:%SZ')
+                }
+            else:
+                params = {
+                    'apiKey': api_key,
+                    'regions': 'us',
+                    ##'markets': 'h2h,spreads',
+                    ##'markets': 'pitcher_strikeouts_alternate,batter_total_bases',
+                    'bookmakers': books.replace("-", ","),
+                    'markets': 'team_totals',
+                    'oddsFormat': 'american',
+                    'commenceTimeFrom': datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ'),
+                    'commenceTimeTo': (datetime.utcnow() + timedelta(days=6)).replace(hour=6, minute=0).strftime(
+                        '%Y-%m-%dT%H:%M:%SZ')
+                }
+        else:
+            if alt == 'y':
+                params = {
+                    'apiKey': api_key,
+                    'regions': 'us',
+                    ##'markets': 'h2h,spreads',
+                    ##'markets': 'pitcher_strikeouts_alternate,batter_total_bases',
+                    'markets': 'team_totals',
+                    'oddsFormat': 'american',
+                    'commenceTimeFrom': datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ'),
+                    'commenceTimeTo': (datetime.utcnow() + timedelta(days=6)).replace(hour=6, minute=0).strftime(
+                        '%Y-%m-%dT%H:%M:%SZ')
+                }
+            else:
+                params = {
+                    'apiKey': api_key,
+                    'regions': 'us',
+                    ##'markets': 'h2h,spreads',
+                    ##'markets': 'pitcher_strikeouts_alternate,batter_total_bases',
+                    'markets': 'team_totals',
+                    'oddsFormat': 'american',
+                    'commenceTimeFrom': datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ'),
+                    'commenceTimeTo': (datetime.utcnow() + timedelta(days=6)).replace(hour=6, minute=0).strftime(
+                        '%Y-%m-%dT%H:%M:%SZ')
+                }
+        response = requests.get(url, params=params)
+        data = response.json()
+
+        events = []
+
+        for event in data:
+            events.append(event['id'])
+
+        flattened_markets = []
+
+        for event in events:
+            url = "https://api.the-odds-api.com/v4/sports/americanfootball_nfl/events/" + event + "/odds"
+            api_key = "22a6282c9744177b06acb842d34a02cb"
+            if books is not None:
+                if alt == 'y':
+                    params = {
+                        'apiKey': api_key,
+                        'regions': 'us',
+                        ##'markets': 'h2h,spreads',
+                        ##'markets': 'pitcher_strikeouts_alternate,batter_total_bases',
+                        'bookmakers': books.replace("-", ","),
+                        'markets': 'team_totals',
+                        'oddsFormat': 'american',
+                        'commenceTimeFrom': datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ'),
+                        'commenceTimeTo': (datetime.utcnow() + timedelta(days=6)).replace(hour=6, minute=0).strftime(
+                            '%Y-%m-%dT%H:%M:%SZ')
+                    }
+                else:
+                    params = {
+                        'apiKey': api_key,
+                        'regions': 'us',
+                        ##'markets': 'h2h,spreads',
+                        ##'markets': 'pitcher_strikeouts_alternate,batter_total_bases',
+                        'bookmakers': books.replace("-", ","),
+                        'markets': 'team_totals',
+                        'oddsFormat': 'american',
+                        'commenceTimeFrom': datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ'),
+                        'commenceTimeTo': (datetime.utcnow() + timedelta(days=6)).replace(hour=6, minute=0).strftime(
+                            '%Y-%m-%dT%H:%M:%SZ')
+                    }
+            else:
+                if alt == 'y':
+                    params = {
+                        'apiKey': api_key,
+                        'regions': 'us',
+                        ##'markets': 'h2h,spreads',
+                        ##'markets': 'pitcher_strikeouts_alternate,batter_total_bases',
+                        'markets': 'team_totals',
+                        'oddsFormat': 'american',
+                        'commenceTimeFrom': datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ'),
+                        'commenceTimeTo': (datetime.utcnow() + timedelta(days=6)).replace(hour=6, minute=0).strftime(
+                            '%Y-%m-%dT%H:%M:%SZ')
+                    }
+                else:
+                    params = {
+                        'apiKey': api_key,
+                        'regions': 'us',
+                        ##'markets': 'h2h,spreads',
+                        ##'markets': 'pitcher_strikeouts_alternate,batter_total_bases',
+                        'markets': 'team_totals',
+                        'oddsFormat': 'american',
+                        'commenceTimeFrom': datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ'),
+                        'commenceTimeTo': (datetime.utcnow() + timedelta(days=6)).replace(hour=6, minute=0).strftime(
+                            '%Y-%m-%dT%H:%M:%SZ')
+                    }
+            # x = datetime.datetime.utcnow().strftime('%Y-%m-%dT%H:%M:%SZ')
+
+            # x = (datetime.utcnow() + timedelta(days=1)).replace(hour=6, minute=0).strftime('%Y-%m-%dT%H:%M:%SZ')
+            # Fetch the data from the API
+            response = requests.get(url, params=params)
+            data = response.json()
+
+            # Extract and flatten markets data
+
+            for entry in data:
+                game_info = {
+                    "id": data["id"],
+                    "sport_key": data["sport_key"],
+                    "sport_title": data["sport_title"],
+                    "commence_time": data["commence_time"],
+                    "home_team": data["home_team"],
+                    "away_team": data["away_team"]
+                }
+                for bookmaker in data["bookmakers"]:
+                    bookmaker_info = {
+                        "bookmaker_key": bookmaker["key"],
+                        "bookmaker_title": bookmaker["title"]
+                    }
+                    for market in bookmaker["markets"]:
+                        market_info = game_info.copy()
+                        market_info.update(bookmaker_info)
+                        market_info.update({
+                            "market_key": market["key"],
+                        })
+                        for outcome in market["outcomes"]:
+                            outcome_info = market_info.copy()
+                            if "point" in outcome:
+                                outcome_info.update({
+                                    "player_name": outcome["description"],
+                                    "outcome_name": outcome["name"],
+                                    "outcome_price": outcome["price"],
+                                    "outcome_point": outcome["point"]
+                                })
+                            else:
+                                outcome_info.update({
+                                    "player_name": outcome["description"],
+                                    "outcome_name": outcome["name"],
+                                    "outcome_price": outcome["price"],
+                                    "outcome_point": 0
+                                })
+                            flattened_markets.append(outcome_info)
+
+        # Convert flattened markets data into a DataFrame
+        df = pd.DataFrame(flattened_markets)
+
+        max_indices = df.groupby(['outcome_name', 'outcome_point'])['outcome_price'].idxmax()
+        # min_indices = df.groupby(['outcome_name','outcome_point'])['outcome_price'].idxmin()
+
+        # Combine the indices and filter the DataFrame
+        # unique_indices = max_indices.append(min_indices).unique()
+        filtered_df = df.loc[max_indices]
+
+        filtered_df['Im_Prob'] = np.where(filtered_df['outcome_price'] >= 0, 100 / (100 + filtered_df['outcome_price']),
+                                          -filtered_df['outcome_price'] / (-filtered_df['outcome_price'] + 100))
+
+        teams = pd.read_csv("nfl_teams.csv")
+        filtered_df = filtered_df.merge(teams, how='left',
+                                        left_on=['player_name'], right_on=['team'])
+        cnx = mysql.connector.connect(user='doadmin', password='AVNS_Lkaktbc2QgJkv-oDi60',
+                                      host='db-mysql-nyc3-89566-do-user-8045222-0.c.db.ondigitalocean.com',
+                                      port=25060,
+                                      database='crowdicate')
+        if cnx and cnx.is_connected():
+            with cnx.cursor() as cursor:
+                cursor.execute("SET time_zone = 'EST';")
+                result = cursor.execute(
+                    "SELECT s.predictable,s.date,s.page,s.prediction,t.id,t.type, t.amount,t.player,t.player_id FROM crowdicate.predictions as s left join crowdicate.predictables as t on s.predictable = t.id WHERE s.date = 'Week " + str(current_week) + "'"
+                )
+
+                rows = cursor.fetchall()
+
+            cnx.close()
+
+        results = pd.DataFrame(list(rows),
+                               columns=["predictable", "date", "page", "prediction", 'id', 'type', 'amount', 'player',
+                                        'player_id'])
+        results = results[results.type == 'NFL - Team Totals']
+
+        predictions_live = filtered_df.merge(results[["player", "amount", "prediction", "page"]], how='left',
+                                             left_on=['abbreviation', "outcome_point"], right_on=['player', "amount"])
+        # predictions_live['diff'] = (((predictions_live['prediction'] - predictions_live['Im_Prob']) / predictions_live[
+        #    'Im_Prob']) * 100).round(1)
+
+        predictions_live['diff'] = ((((1 / predictions_live['Im_Prob']) - 1) * predictions_live['prediction']) + (
+                (1 - (predictions_live['prediction'])) * -1)).round(4)
+
+        predictions_live = predictions_live.dropna(subset=['prediction', 'page', 'diff'])
+        predictions_live = predictions_live.sort_values(["outcome_name", 'outcome_point'], ascending=[True, True])
+
+        # Group the data
+        grouped = predictions_live.groupby(['abbreviation', 'bookmaker_title', 'outcome_price', 'outcome_point'])
+
+        # Initialize the list to hold the final JSON structure
+        bets = []
+
+        # Iterate through the groups and construct the JSON structure
+        for (abbreviation, bookmaker_title, outcome_price, outcome_point), group in grouped:
+            predictions = []
+            for _, row in group.iterrows():
+                predictions.append({
+                    "page": row['page'],
+                    "diff": str(row['diff'])
+                })
+            bet = {
+                "player_name": abbreviation,
+                "bookmaker_title": bookmaker_title,
+                "outcome_price": str(outcome_price),
+                "outcome_point": str(outcome_point),
+                "predictions": predictions
+            }
+            bets.append(bet)
+
+        # Create the final JSON structure
+        final_json = {
+            "bets": bets
+        }
+
+        return json.dumps(final_json, indent=2)
     else:
         url = "https://api.the-odds-api.com/v4/sports/americanfootball_nfl/odds"
         api_key = "22a6282c9744177b06acb842d34a02cb"
