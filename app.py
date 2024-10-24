@@ -2117,8 +2117,9 @@ def test_bet(market,alt,books = None):
 
         # Convert flattened markets data into a DataFrame
         df = pd.DataFrame(flattened_markets)
+        df = df[df['outcome_name'] == 'Over']
 
-        max_indices = df.groupby(['outcome_name', 'outcome_point'])['outcome_price'].idxmax()
+        max_indices = df.groupby(['player_name', 'outcome_point'])['outcome_price'].idxmax()
         # min_indices = df.groupby(['outcome_name','outcome_point'])['outcome_price'].idxmin()
 
         # Combine the indices and filter the DataFrame
