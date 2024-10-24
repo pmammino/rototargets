@@ -2159,16 +2159,16 @@ def test_bet(market,alt,books = None):
                 (1 - (predictions_live['prediction'])) * -1)).round(4)
 
         predictions_live = predictions_live.dropna(subset=['prediction', 'page', 'diff'])
-        predictions_live = predictions_live.sort_values(["abbreviation", 'outcome_point'], ascending=[True, True])
+        predictions_live = predictions_live.sort_values(["player_name", 'outcome_point'], ascending=[True, True])
 
         # Group the data
-        grouped = predictions_live.groupby(['abbreviation', 'bookmaker_title', 'outcome_price', 'outcome_point'])
+        grouped = predictions_live.groupby(['player_name', 'bookmaker_title', 'outcome_price', 'outcome_point'])
 
         # Initialize the list to hold the final JSON structure
         bets = []
 
         # Iterate through the groups and construct the JSON structure
-        for (abbreviation, bookmaker_title, outcome_price, outcome_point), group in grouped:
+        for (player_name, bookmaker_title, outcome_price, outcome_point), group in grouped:
             predictions = []
             for _, row in group.iterrows():
                 predictions.append({
@@ -2176,7 +2176,7 @@ def test_bet(market,alt,books = None):
                     "diff": str(row['diff'])
                 })
             bet = {
-                "player_name": abbreviation,
+                "player_name": player_name,
                 "bookmaker_title": bookmaker_title,
                 "outcome_price": str(outcome_price),
                 "outcome_point": str(outcome_point),
