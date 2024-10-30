@@ -185,7 +185,7 @@ def get_template(page_id):
                     link_list.append(splitting[0])
                     link_list.append(splitting[1])
 
-    current_week = 8
+    current_week = 9
     type_list = results_type['type_text'].tolist()
 
     if any("NFL" in s for s in type_list):
@@ -1273,7 +1273,7 @@ def bet_finder_strikeouts(post_id):
 @application.route("/test_bet_finder/<string:market>/<string:alt>/")
 @application.route("/test_bet_finder/<string:market>/<string:alt>/<string:books>")
 def test_bet(market,alt,books = None):
-    current_week = 8
+    current_week = 9
     if market == "strikeouts":
         # API endpoint and key
         url = "https://api.the-odds-api.com/v4/sports/baseball_mlb/events/"
@@ -2568,7 +2568,7 @@ def predict_single(page_id,post_id,predictable_id,prediction):
             rows = cursor.fetchall()
 
             results = pd.DataFrame(list(rows), columns=["id", "amount", "player", "player_id", "type"])
-            current_week = 8
+            current_week = 9
 
             results['date'] = np.where(results["type"].str.contains('NFL'),
                                        "Week " + str(current_week),
@@ -2605,7 +2605,7 @@ def predict_model_nfl(post_id,page_id,model_id):
     response = requests.get("https://crowdicate.com/api/1.1/obj/models")
     data = response.json()
     results = pd.DataFrame(data["response"]["results"])
-    current_week = 8
+    current_week = 9
     while data["response"]["remaining"] > 0:
         cursor = data["response"]["cursor"] + 100
         response = requests.get(
@@ -2883,7 +2883,7 @@ def get_aggregate_nfl(post_id,page,type):
                               host='db-mysql-nyc3-89566-do-user-8045222-0.c.db.ondigitalocean.com',
                               port=25060,
                               database='crowdicate')
-    current_week = 8
+    current_week = 9
     if cnx and cnx.is_connected():
         with cnx.cursor() as cursor:
             result = cursor.execute("SELECT * FROM predictions")
@@ -2999,7 +2999,7 @@ def get_market_nfl(post_id,page_id,type_id):
                 result_b = cursor.execute("SELECT * FROM predictables")
 
                 types = cursor.fetchall()
-                current_week = 8
+                current_week = 9
 
                 results = pd.DataFrame(list(rows), columns=["id", "amount", "player", "player_id", "type"])
                 results['date'] = "Week " + str(current_week)
@@ -3150,7 +3150,7 @@ def get_market_nfl(post_id,page_id,type_id):
                 result_b = cursor.execute("SELECT * FROM predictables")
 
                 types = cursor.fetchall()
-                current_week = 8
+                current_week = 9
 
                 results = pd.DataFrame(list(rows), columns=["id", "amount", "player", "player_id", "type"])
                 results['date'] = "Week " + str(current_week)
@@ -3305,7 +3305,7 @@ def get_market_nfl(post_id,page_id,type_id):
                 result_b = cursor.execute("SELECT * FROM predictables")
 
                 types = cursor.fetchall()
-                current_week = 8
+                current_week = 9
 
                 results = pd.DataFrame(list(rows), columns=["id", "amount", "player", "player_id", "type"])
                 results['date'] = "Week " + str(current_week)
@@ -3454,7 +3454,7 @@ def get_market_nfl(post_id,page_id,type_id):
                 result_b = cursor.execute("SELECT * FROM predictables")
 
                 types = cursor.fetchall()
-                current_week = 8
+                current_week = 9
 
                 results = pd.DataFrame(list(rows), columns=["id", "amount", "player", "player_id", "type"])
                 results['date'] = "Week " + str(current_week)
